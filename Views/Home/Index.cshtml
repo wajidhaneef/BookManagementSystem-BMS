@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div style="display: flex; flex-direction: column; height: 100vh;">
+    <div style="flex: 1; display: flex;">
+        <div style="flex: 1; padding: 10px;">
+            <h2>Categories</h2>
+            <ul>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <li>
+                        <a href="@Url.Action("CategoryOverview", new { categoryId = category.CategoryID })">
+                            @category.CategoryName
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div style="flex: 1; padding: 10px;">
+            <h2>Book and Chapter</h2>
+            <div>
+                <label for="bookSearchInput">Search Book:</label>
+                <input type="text" id="bookSearchInput" placeholder="Enter book name" />
+            </div>
+            <div>
+                <label for="chapterDropdown">Select Chapter:</label>
+                <select id="chapterDropdown">
+                    <option value="">-- Select Chapter --</option>
+                    @foreach (var chapter in ViewBag.Chapters)
+                    {
+                        <option value="@chapter.ChapterID">@chapter.ChapterName</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div style="flex: 1; padding: 10px;">
+        <h2>Random Book Images</h2>
+        <ul>
+            @foreach (var book in ViewBag.Books)
+            {
+                <li>
+                    <a href="@Url.Action("BookOverview", new { bookId = book.BookID })">
+                        <img src="book-image-url" alt="@book.BookName" width="150" height="200" />
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>

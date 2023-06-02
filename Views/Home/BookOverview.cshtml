@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Book Overview";
+}
+
+<h1>Book: @ViewBag.Book.BookName</h1>
+
+<h2>Chapters</h2>
+<ul>
+    @foreach (var chapter in ViewBag.Chapters)
+    {
+        <li>
+            <a href="@Url.Action("ChapterContent", new { chapterId = chapter.ChapterID })">
+                @chapter.ChapterName
+            </a>
+        </li>
+    }
+</ul>

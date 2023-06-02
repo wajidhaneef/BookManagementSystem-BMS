@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-half" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div id="loginForm">
+                        <form id="loginFormContent" action="@Url.Action("Login", "User")" method="get">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <button id="signupButton" type="button" class="btn btn-primary flex">Sign Up</button>
+                        </form>
+                    </div>
+                    <div id="signupForm" style="display: none;">
+                        <button id="backButton" class="btn btn-primary">Back to Login</button>
+                        <form id="signupFormContent" action="@Url.Action("Create", "User")" method="post">
+                            <div class="form-group">
+                                <label for="signupUsername">Username</label>
+                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="signupPassword">Password</label>
+                                <input type="password" class="form-control" id="signupPassword" name="signupPassword" placeholder="Enter password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Confirm Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">SignUp</button>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</body>
+</html>
