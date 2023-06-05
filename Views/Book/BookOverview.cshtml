@@ -1,0 +1,92 @@
+﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
+
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Categories</h4>
+        <div class="form-group">
+            <label for="selectedCategory">Select Category:</label>
+            <select id="selectedCategory" class="form-control">
+                <option value="1">-- Select a category --</option>
+                @foreach (var category in Model.AllCategories)
+                {
+                    <option value="@category.CategoryID">@category.CategoryName</option>
+                }
+            </select>
+        </div>
+
+        <div id="bookList" class="mt-4">
+            <div id="booksDropdown">
+                <select class="form-control">
+                    <option value="">-- Select a book --</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="chapterList" class="mt-4">
+            <div id="chaptersDropdown">
+                <select class="form-control" id="selectedChapter">
+                    <option value="">-- Select a chapter --</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Chapter Content</h4>
+        <div id="chapterContent">
+            <p>@Model.SelectedChapterContent</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#selectedCategory").change(function () {
+            var categoryId = $("#selectedCategory").val();
+            if (categoryId !== "") {
+                $.ajax({
+                    url: "@Url.Action("GetBooksByCategory", "Book")",
+                    data: { categoryId: this.categoryId },
+                    type: "GET",
+                    success: function (result) {
+                        $("#bookList").html(result);
+                    },
+                });
+            }
+        });
+
+        $("#selectedBook").change(function () {
+            var bookId = $("#selectedBook").val();
+            if (bookId !== "") {
+                $.ajax({
+                    url: "@Url.Action("GetChaptersByBook", "Book")",
+                    data: { bookId: bookId },
+                    type: "GET",
+                    success: function (result) {
+                        $("#selectedChapter").html(result);
+                    },
+                });
+            }
+        });
+
+        $("#selectedChapter").change(function () {
+            var chapterId = $("#selectedChapter").val();
+            if (chapterId !== "") {
+                $.ajax({
+                    url: "@Url.Action("GetChapterContent", "Book")",
+                    data: { chapterId: chapterId },
+                    type: "GET",
+                    success: function (result) {
+                        $("#chapterContent").html("<p>" + result + "</p>");
+                    },
+                    error: function (xhr) {
+                        console.log(xhr.responseText);
+                    }
+                });
+            } else {
+                $("#chapterContent").empty();
+            }
+        });
+    });
+</script>

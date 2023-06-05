@@ -14,6 +14,7 @@ namespace BookManagementSystem_BMS.Data
         public DbSet<Chapter> Chapters { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<CoverPage> CoverPages { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -33,6 +34,11 @@ namespace BookManagementSystem_BMS.Data
             .HasOne(b => b.Category)
             .WithMany(c => c.Books)
             .HasForeignKey(b => b.CategoryID);
+
+            modelBuilder.Entity<Book>()
+            .HasOne(b => b.CoverPage)
+            .WithOne()
+            .HasForeignKey<Book>(b => b.CoverPageId);
 
             modelBuilder.Entity<Chapter>()
             .HasOne(c => c.Book)

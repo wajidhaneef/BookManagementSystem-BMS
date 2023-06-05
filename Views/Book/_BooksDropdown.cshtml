@@ -1,0 +1,9 @@
+﻿@model List<BookManagementSystem_BMS.Models.Book>
+
+<select class="form-control" id="selectedBook">
+    <option value="">-- Select a book --</option>
+    @foreach (var book in Model)
+    {
+        <option value="@book.BookID">@book.BookName</option>
+    }
+</select>

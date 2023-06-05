@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<div style="display: flex; flex-direction: column; height: 100vh;">
+    <div style="flex: 1; display: flex; border:10px;" class="border">
+        <div style="flex: 1; padding: 10px;" class="border">
+            <h2>Categories</h2>
+            <ul>
+                @foreach (var category in ViewBag.Categories)
+                {
+                    <li>
+                        <a href="@Url.Action("Details", new { categoryId = category.CategoryID })">
+                            @category.CategoryName
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div style="flex: 1; padding: 10px;" class="border">
+            <h2>Book and Chapter</h2>
+            <div>
+                <label for="bookSearchInput">Search Book:</label>
+                <input type="text" id="bookSearchInput" placeholder="Enter book name" />
+            </div>
+            <div>
+                <label for="chapterDropdown">Select Chapter:</label>
+                <select id="chapterDropdown">
+                    <option value="">-- Select Chapter --</option>
+                    @foreach (var chapter in ViewBag.Chapters)
+                    {
+                        <option value="@chapter.ChapterID">@chapter.ChapterName</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+    <div style="flex: 1; padding: 10px;" class="border">
+        <h2>Random Book Images</h2>
+        <ul>
+            @foreach (var book in ViewBag.Books)
+            {
+                <li class="border">
+                    <a href="@Url.Action("BookOverview", new { bookId = book.BookID })">
+                        <img src="book-image-url" alt="@book.BookName" width="150" height="200" />
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // AJAX call to get matching books based on input text
+        $('#bookName').keyup(function () {
+            var searchText = $(this).val();
+
+            if (searchText.length >= 3) {
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("SearchBooks", "Book")',
+                    data: { searchText: searchText },
+                    success: function (result) {
+                        $('#searchResults').html(result);
+                    }
+                });
+            }
+            else {
+                $('#searchResults').empty();
+            }
+        });
+
+        // AJAX call to get chapters of selected book
+        $('#selectedBook').change(function () {
+            var bookId = $(this).val();
+
+            if (bookId !== '') {
+                $.ajax({
+                    type: 'GET',
+                    url: '@Url.Action("GetChapters", "Book")',
+                    data: { bookId: bookId },
+                    success: function (result) {
+                        $('#chapterList').html(result);
+                    }
+                });
+            }
+            else {
+                $('#chapterList').empty();
+            }
+        });
+    </script>
+}

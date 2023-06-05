@@ -1,0 +1,9 @@
+﻿@model List<Chapter>
+
+<select id="chaptersDropdown" class="form-control">
+    <option value="">Select a Chapter</option>
+    @foreach (var chapter in Model)
+    {
+        <option value="@chapter.ChapterID">@chapter.ChapterName</option>
+    }
+</select>
