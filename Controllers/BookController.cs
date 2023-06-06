@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace BookManagementSystem_BMS.Controllers
 {
@@ -46,16 +47,28 @@ namespace BookManagementSystem_BMS.Controllers
         // GET: BookController/Details/5
         public ActionResult Details(int categoryId)
         {
+            var categories = _dbContext.Categories.ToList();
             var viewModel = new BookViewModel
             {
-                AllCategories = _dbContext.Categories.ToList(),
-                SelectedCategory = _dbContext.Categories.FirstOrDefault(b => b.CategoryID == categoryId).CategoryName,
+                AllCategories = categories,
+                SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
                 SelectedCategoryId = categoryId
             };
 
             return View("BookOverview",viewModel);
         }
+        public ActionResult BookOverviewByCover (int bookId, int categoryId)
+        {
+            var categories = _dbContext.Categories.ToList();
+            var viewModel = new BookViewModel
+            {
+                AllCategories = categories,
+                SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
+                SelectedCategoryId = categoryId
+            };
 
+            return View("BookOverview", viewModel);
+        }
         // GET: BookController/Create
         //public ActionResult Create()
         //{
@@ -132,19 +145,33 @@ namespace BookManagementSystem_BMS.Controllers
         }
 
         // GET: Book/GetBooksByCategory
-        public ActionResult GetBooksByCategory(int categoryId)
+        public ActionResult GetBooksByCategory(int categoryId, int bookId)
         {
+            //var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
             var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+            var viewModel = new BookViewModel
+            {
+                Books = books,
+                SelectedBook = books.FirstOrDefault(b => b.BookID == bookId, books.First()).BookName,
+                SelectedBookId = bookId!=0?bookId :books.First().BookID,
+            };
 
-            return PartialView("_BooksDropdown", books);
+            return PartialView("_BooksDropdown", viewModel);
         }
-
+        
         // GET: Book/GetChaptersByBook
-        public ActionResult GetChaptersByBook(int bookId)
+        public ActionResult GetChaptersByBook(int bookId, int chapterId)
         {
-            var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+            //var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+            var chapters = _dbContext.Chapters.Where(b => b.BookID == bookId).ToList();
+            var viewModel = new BookViewModel
+            {
+                Chapters = chapters,
+                SelectedChapter = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).ChapterName,
+                SelectedChapterId = chapterId!=0?chapterId: chapters.First().ChapterID,
+            };
 
-            return PartialView("_ChaptersDropdown", chapters);
+            return PartialView("_ChaptersDropdown", viewModel);
         }
 
         // GET: Book/GetChapterContent

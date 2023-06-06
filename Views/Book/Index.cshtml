@@ -41,7 +41,7 @@
             @foreach (var book in ViewBag.Books)
             {
                 <li class="border">
-                    <a href="@Url.Action("BookOverview", new { bookId = book.BookID })">
+                    <a href="@Url.Action("BookOverviewByCover", new { bookId = book.BookID, categoryId=book.CategoryID})">
                         <img src="book-image-url" alt="@book.BookName" width="150" height="200" />
                     </a>
                 </li>

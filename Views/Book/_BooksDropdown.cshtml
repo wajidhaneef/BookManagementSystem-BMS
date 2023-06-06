@@ -1,9 +1,20 @@
-﻿@model List<BookManagementSystem_BMS.Models.Book>
+﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
 
-<select class="form-control" id="selectedBook">
-    <option value="">-- Select a book --</option>
-    @foreach (var book in Model)
-    {
-        <option value="@book.BookID">@book.BookName</option>
-    }
-</select>
+<h4>Books</h4>
+<div class="form-group">
+    <label for="selectedBook">Select Book:</label>
+    @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
+    "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
+    @class = "form-control", onchange="loadChapters()",})
+    
+</div>
+@*<div id="booksDropdwon" class="form-group">
+    <label for="booksDropdwon">Select Category:</label>
+    <select class="form-control" id="selectedBook" onchange="loadChapters()">
+        <option value="3">-- Select a book --</option>
+        @foreach (var book in Model)
+        {
+            <option value="@book.BookID">@book.BookName</option>
+        }
+    </select>
+</div>*@
