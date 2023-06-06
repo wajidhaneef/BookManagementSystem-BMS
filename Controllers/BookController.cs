@@ -57,24 +57,37 @@ namespace BookManagementSystem_BMS.Controllers
 
             return View("BookOverview",viewModel);
         }
-        public ActionResult BookOverviewByCover (int bookId, int categoryId, int chapterId)
+        public ActionResult BookOverviewByCover(int bookId, int categoryId, int chapterId)
         {
             var categories = _dbContext.Categories.ToList();
-            var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
-            var chapters = _dbContext.Chapters.Where(b => b.BookID == bookId).ToList();
+            var SelectedBookId = _dbContext.Books.FirstOrDefault(b => b.CategoryID == categoryId).BookID;
+            var SelectedChapterId = _dbContext.Chapters.FirstOrDefault(b => b.BookID == bookId).ChapterID;
             var viewModel = new BookViewModel
             {
                 AllCategories = categories,
                 SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
                 SelectedCategoryId = categoryId,
-                Books = books,
-                SelectedBook = books.FirstOrDefault(b => b.BookID == bookId, books.First()).BookName,
-                SelectedBookId = bookId != 0 ? bookId : books.First().BookID,
-                Chapters = chapters,
-                SelectedChapter = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).ChapterName,
-                SelectedChapterId = chapterId != 0 ? chapterId : chapters.First().ChapterID,
+                SelectedBookId = bookId != 0 ? bookId : SelectedBookId,
+                SelectedChapterId = chapterId != 0 ? chapterId : SelectedChapterId,
 
             };
+            //var categories = _dbContext.Categories.ToList();
+            //var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+            //var chapters = _dbContext.Chapters.Where(b => b.BookID == bookId).ToList();
+            //var viewModel = new BookViewModel
+            //{
+            //    AllCategories = categories,
+            //    SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
+            //    SelectedCategoryId = categoryId,
+            //    Books = books,
+            //    SelectedBook = books.FirstOrDefault(b => b.BookID == bookId, books.First()).BookName,
+            //    SelectedBookId = bookId != 0 ? bookId : books.First().BookID,
+            //    Chapters = chapters,
+            //    SelectedChapter = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).ChapterName,
+            //    SelectedChapterId = chapterId != 0 ? chapterId : chapters.First().ChapterID,
+            //    SelectedChapterContent = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).Content,
+
+            //};
 
             return View("BookOverview", viewModel);
         }

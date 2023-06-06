@@ -22,24 +22,24 @@
         </div>*@
 
         <div id="books" class="mt-4">
-            <h4>Books</h4>
+            @*<h4>Books</h4>
             <div class="form-group">
                 <label for="selectedBook">Select Book:</label>
                 @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
                 "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
                 @class = "form-control", onchange="loadChapters()",})
 
-            </div>
+            </div>*@
         </div>
 
         <div id="chapters" class="mt-4">
-            <h4>Chapters</h4>
+            @*<h4>Chapters</h4>
             <div class="form-group">
                 <label for="selectedChapter">Select Chapter:</label>
                 @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
                 "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
                 @class = "form-control", onchange="loadChapterContent()",})
-            </div>
+            </div>*@
         </div>
     </div>
 
@@ -65,7 +65,7 @@
                 $.ajax({
                     url: '@Url.Action("GetBooksByCategory")',
                     type: 'GET',
-                    data: { categoryId: categoryId },
+                    data: { categoryId: categoryId != 0 ? categoryId : @Model.SelectedCategoryId, bookId: @Model.SelectedBookId },
                     success: function (result) {
                         $("#books").html(result);
                     },
@@ -88,7 +88,7 @@
                 $.ajax({
                     url: '@Url.Action("GetChaptersByBook")',
                     type: 'GET',
-                    data: { bookId: bookId },
+                    data: { bookId: bookId, chapterId:@Model.SelectedChapterId },
                     success: function (result) {
                         $("#chapters").html(result);
                         $("#chapterContent").html("<p>Select a chapter to view its content.</p>");
@@ -111,7 +111,7 @@
                 $.ajax({
                     url: '@Url.Action("GetChapterContent")',
                     type: 'GET',
-                    data: { chapterId: chapterId },
+                    data: { chapterId: chapterId != 0 ? chapterId : @Model.SelectedChapterId },
                     success: function (result) {
                         $("#chapterContent").html("<p>" + result + "</p>");
                     },
