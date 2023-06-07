@@ -5,7 +5,7 @@
     <label for="selectedChapter">Select Chapter:</label>
     @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
     "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
-    @class = "form-control", onchange="loadChapterContent()",})
+    @class = "form-control",})
 </div>
 
 @*

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Net;
 
 namespace BookManagementSystem_BMS.Controllers
 {
@@ -19,29 +20,40 @@ namespace BookManagementSystem_BMS.Controllers
             _dbContext = dbContext;
         }
         // GET: BookController
-        public async Task<IActionResult> Index(string bookSearch)
+        public IActionResult Index(string bookSearch)
         {
-            // Get a list of categories
-            var categories = await _dbContext.Categories.ToListAsync();
-
-            // Get a list of books with their respective categories
-            var booksQuery = _dbContext.Books.Include(b => b.Category).AsQueryable();
-
-            if (!string.IsNullOrEmpty(bookSearch))
+            var categories = _dbContext.Categories.ToList();
+            var books = _dbContext.Books.ToList();
+            var coverpages = _dbContext.CoverPages.ToList();
+            var viewModel = new BookViewModel
             {
-                booksQuery = booksQuery.Where(b => b.BookName.Contains(bookSearch));
-            }
+                AllCategories = categories,
+                Books = books,
+                CoverPages = coverpages,
 
-            var books = await booksQuery.ToListAsync();
+            };
+            return View(viewModel);
+            // Get a list of categories
+            //var categories = await _dbContext.Categories.ToListAsync();
 
-            // Get a list of chapters for all books
-            var chapters = await _dbContext.Chapters.ToListAsync();
+            //// Get a list of books with their respective categories
+            //var booksQuery = _dbContext.Books.Include(b => b.Category).AsQueryable();
 
-            // Pass the categories, books, and chapters to the view
-            ViewBag.Categories = categories;
-            ViewBag.Books = books;
-            ViewBag.Chapters = chapters;
-            return View();
+            //if (!string.IsNullOrEmpty(bookSearch))
+            //{
+            //    booksQuery = booksQuery.Where(b => b.BookName.Contains(bookSearch));
+            //}
+
+            //var books = await booksQuery.ToListAsync();
+
+            //// Get a list of chapters for all books
+            //var chapters = await _dbContext.Chapters.ToListAsync();
+
+            //// Pass the categories, books, and chapters to the view
+            //ViewBag.Categories = categories;
+            //ViewBag.Books = books;
+            //ViewBag.Chapters = chapters;
+            //return View();
         }
 
         // GET: BookController/Details/5
@@ -57,10 +69,19 @@ namespace BookManagementSystem_BMS.Controllers
 
             return View("BookOverview",viewModel);
         }
-        public ActionResult BookOverviewByCover(int bookId, int categoryId, int chapterId)
+        public ActionResult BookOverviewByCover(int bookId, int categoryId, int chapterId, int home)
         {
             var categories = _dbContext.Categories.ToList();
-            var SelectedBookId = _dbContext.Books.FirstOrDefault(b => b.CategoryID == categoryId).BookID;
+            var SelectedBookId = 0;
+            if (home==1)
+            {
+                categoryId = _dbContext.Books.FirstOrDefault(b => b.BookID == bookId).CategoryID;
+            }
+            else
+            {
+                SelectedBookId = _dbContext.Books.FirstOrDefault(b => b.CategoryID == categoryId).BookID;
+            }
+            
             var SelectedChapterId = _dbContext.Chapters.FirstOrDefault(b => b.BookID == bookId).ChapterID;
             var viewModel = new BookViewModel
             {
