@@ -4,8 +4,11 @@ using BookManagementSystem_BMS.Models;
 using BookManagementSystem_BMS.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 
@@ -24,37 +27,45 @@ namespace BookManagementSystem_BMS.Controllers
         {
             var categories = _dbContext.Categories.ToList();
             var books = _dbContext.Books.ToList();
+
             var coverpages = _dbContext.CoverPages.ToList();
+            List<CoverPageViewModel> CoverImages = new List<CoverPageViewModel>();
+            foreach (var coverPage in coverpages)
+            {
+                if (coverPage != null)
+                {
+                    // Create a memory stream from the image data
+                    //var arr = coverPage.ImageData.ToArray();
+                    //var stream = new MemoryStream(coverPage.ImageData);
+                    byte[] imgBytes = (byte[])coverPage.ImageData;
+
+                    //If you want convert to a bitmap file
+                    TypeConverter tc = TypeDescriptor.GetConverter(typeof(Bitmap));
+                    //Bitmap MyBitmap = (Bitmap)tc.ConvertFrom(imgBytes);
+                    // Set the content type based on the file extension
+                    //var contentType = GetContentType(coverPage.ImageMimeType);
+                    //Image img = Image.FromStream(stream, false, true);
+                    // Return the image as a file result
+                    CoverImages.Add(new CoverPageViewModel{
+                        //CoverImage = MyBitmap, BookId=coverPage.BookId,
+                        BookName= books.FirstOrDefault(b=>b.BookID==coverPage.BookId).BookName,
+                        CategoryId = books.FirstOrDefault(b => b.BookID == coverPage.BookId).CategoryID,
+                        ImageContent = imgBytes
+                    });
+                }
+            }
+            
             var viewModel = new BookViewModel
             {
                 AllCategories = categories,
                 Books = books,
-                CoverPages = coverpages,
+                CoverPages = CoverImages,
 
             };
             return View(viewModel);
-            // Get a list of categories
-            //var categories = await _dbContext.Categories.ToListAsync();
-
-            //// Get a list of books with their respective categories
-            //var booksQuery = _dbContext.Books.Include(b => b.Category).AsQueryable();
-
-            //if (!string.IsNullOrEmpty(bookSearch))
-            //{
-            //    booksQuery = booksQuery.Where(b => b.BookName.Contains(bookSearch));
-            //}
-
-            //var books = await booksQuery.ToListAsync();
-
-            //// Get a list of chapters for all books
-            //var chapters = await _dbContext.Chapters.ToListAsync();
-
-            //// Pass the categories, books, and chapters to the view
-            //ViewBag.Categories = categories;
-            //ViewBag.Books = books;
-            //ViewBag.Chapters = chapters;
-            //return View();
+            
         }
+        
 
         // GET: BookController/Details/5
         public ActionResult Details(int categoryId)
@@ -72,7 +83,9 @@ namespace BookManagementSystem_BMS.Controllers
         public ActionResult BookOverviewByCover(int bookId, int categoryId, int chapterId, int home)
         {
             var categories = _dbContext.Categories.ToList();
+            var chapters = _dbContext.Chapters.ToList();
             var SelectedBookId = 0;
+            var SelectedChapterId = 0;
             if (home==1)
             {
                 categoryId = _dbContext.Books.FirstOrDefault(b => b.BookID == bookId).CategoryID;
@@ -80,9 +93,10 @@ namespace BookManagementSystem_BMS.Controllers
             else
             {
                 SelectedBookId = _dbContext.Books.FirstOrDefault(b => b.CategoryID == categoryId).BookID;
+                SelectedChapterId = chapters.FirstOrDefault(b => b.BookID == bookId, chapters.First()).ChapterID;
             }
             
-            var SelectedChapterId = _dbContext.Chapters.FirstOrDefault(b => b.BookID == bookId).ChapterID;
+            
             var viewModel = new BookViewModel
             {
                 AllCategories = categories,
@@ -92,99 +106,26 @@ namespace BookManagementSystem_BMS.Controllers
                 SelectedChapterId = chapterId != 0 ? chapterId : SelectedChapterId,
 
             };
-            //var categories = _dbContext.Categories.ToList();
-            //var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
-            //var chapters = _dbContext.Chapters.Where(b => b.BookID == bookId).ToList();
-            //var viewModel = new BookViewModel
-            //{
-            //    AllCategories = categories,
-            //    SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
-            //    SelectedCategoryId = categoryId,
-            //    Books = books,
-            //    SelectedBook = books.FirstOrDefault(b => b.BookID == bookId, books.First()).BookName,
-            //    SelectedBookId = bookId != 0 ? bookId : books.First().BookID,
-            //    Chapters = chapters,
-            //    SelectedChapter = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).ChapterName,
-            //    SelectedChapterId = chapterId != 0 ? chapterId : chapters.First().ChapterID,
-            //    SelectedChapterContent = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).Content,
-
-            //};
 
             return View("BookOverview", viewModel);
-        }
-        // GET: BookController/Create
-        //public ActionResult Create()
-        //{
-        //    return View();
-        //}
-
-        // POST: BookController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
+            /*var categories = _dbContext.Categories.ToList();
+            var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+            var chapters = _dbContext.Chapters.Where(b => b.BookID == bookId).ToList();
+            var viewModel = new BookViewModel
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                AllCategories = categories,
+                SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
+                SelectedCategoryId = categoryId,
+                Books = books,
+                SelectedBook = books.FirstOrDefault(b => b.BookID == bookId, books.First()).BookName,
+                SelectedBookId = bookId != 0 ? bookId : books.First().BookID,
+                Chapters = chapters,
+                SelectedChapter = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).ChapterName,
+                SelectedChapterId = chapterId != 0 ? chapterId : chapters.First().ChapterID,
+                SelectedChapterContent = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).Content,
 
-        // GET: BookController/Edit/5
-        //public ActionResult Edit(int id)
-        //{
-        //    return View();
-        //}
+            };*/
 
-        // POST: BookController/Edit/5
-        /*[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult Create(BookDto model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        Category category = (Category)model.Category.Where(c => c.Selected == true);
-        //        // Create a new Book entity
-        //        var book = new Book
-        //        {
-        //            BookName = model.BookName,
-        //            Category = category,
-        //            CategoryID = category.CategoryID,
-        //        };
-
-        //        // Save the new book to the database
-        //        _dbContext.Books.Add(book);
-        //        _dbContext.SaveChanges();
-
-        //        return RedirectToAction(nameof(Index));
-        //    }
-
-        //    // If the model state is not valid, return the Create view with the model to display validation errors
-        //    return View(model);
-        }*/
-
-        // GET: BookController/Delete/5
-        //public ActionResult Delete(int id)
-        //{
-        //    return View();
-        //}
-
-        // POST: BookController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
         }
 
         // GET: Book/GetBooksByCategory
@@ -228,6 +169,86 @@ namespace BookManagementSystem_BMS.Controllers
             }
 
             return Content(string.Empty);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> UploadCoverPage()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> UploadCoverPage(IFormFile coverPageFile, int bookId)
+        {
+            if (coverPageFile != null && coverPageFile.Length > 0)
+            {
+                using (var stream = new MemoryStream())
+                {
+                    await coverPageFile.CopyToAsync(stream);
+                    var imageData = stream.ToArray();
+
+                    // Get the file extension
+                    var fileExtension = Path.GetExtension(coverPageFile.FileName).ToLower();
+
+                    // Save the image data and file extension to the database
+                    var coverPage = new CoverPage
+                    {
+                        ImageData = imageData,
+                        ImageMimeType = fileExtension,
+                        BookId = bookId,
+                    };
+
+                    // Assuming you have an instance of your database context named `_dbContext`
+                    _dbContext.CoverPages.Add(coverPage);
+                    await _dbContext.SaveChangesAsync();
+                    var book = await _dbContext.Books.FirstOrDefaultAsync(c => c.BookID == bookId);
+                    //book.CoverPageId = coverPage.Id;
+                    //_dbContext.Update(book);
+                    await _dbContext.SaveChangesAsync();
+                    // Return a success message or redirect to another page
+                    return RedirectToAction("Index");
+                }
+            }
+
+            // Handle invalid or missing file
+            return RedirectToAction("Error");
+        }
+
+        /////////////////////////////////////////////////////////////
+        public IActionResult ShowCoverPage(int coverPageId)
+        {
+            var coverPage = _dbContext.CoverPages.FirstOrDefault(cp => cp.Id == coverPageId);
+            if (coverPage != null)
+            {
+                // Create a memory stream from the image data
+                var stream = new MemoryStream(coverPage.ImageData);
+
+                // Set the content type based on the file extension
+                var contentType = GetContentType(coverPage.ImageMimeType);
+
+                // Return the image as a file result
+                return File(stream, contentType);
+            }
+
+            // Handle if cover page is not found
+            return RedirectToAction("Error");
+        }
+
+        private string GetContentType(string fileExtension)
+        {
+            // Define content types for common image file extensions
+            switch (fileExtension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                    return "image/jpeg";
+                case ".png":
+                    return "image/png";
+                case ".gif":
+                    return "image/gif";
+                // Add more cases for other file extensions if needed
+                default:
+                    return "application/octet-stream";
+            }
         }
 
     }

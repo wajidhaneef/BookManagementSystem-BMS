@@ -1,4 +1,5 @@
 ﻿using BookManagementSystem_BMS.Models;
+using System.Drawing;
 
 namespace BookManagementSystem_BMS.ViewModels
 {
@@ -14,6 +15,6 @@ namespace BookManagementSystem_BMS.ViewModels
         public int SelectedChapterId { get; set; }
         public string SelectedChapter { get; set; }
         public string SelectedChapterContent { get; set; }
-        public List<CoverPage> CoverPages { get; set; }
+        public List<CoverPageViewModel> CoverPages { get; set; }
     }
 }

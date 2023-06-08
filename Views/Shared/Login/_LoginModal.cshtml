@@ -3,16 +3,15 @@
 <head>
 </head>
 <body>
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-half" role="document">
+    <div id="loginModal" class="modal" >
+        <div class="modal-dialog modal-dialog-centered modal-dialog-half" role="document" tabindex="-1">
             <div class="modal-content">
                 <div class="modal-body">
                     <div id="loginForm">
                         <form id="loginFormContent" action="@Url.Action("Login", "User")" method="get">
                             <div class="form-group">
                                 <label for="username">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" onkeydown="return /[a-z]/i.test(event.key)" required>
                             </div>
                             <div class="form-group">
                                 <label for="password">Password</label>
@@ -24,10 +23,18 @@
                     </div>
                     <div id="signupForm" style="display: none;">
                         <button id="backButton" class="btn btn-primary">Back to Login</button>
-                        <form id="signupFormContent" action="@Url.Action("Create", "User")" method="post">
+                        <form id="signupFormContent" action="@Url.Action("Signup", "User")" method="post" onSubmitHandle()>
                             <div class="form-group">
                                 <label for="signupUsername">Username</label>
-                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter username" required>
+                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter username" onkeydown="return /[a-z]/i.test(event.key)" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="emailAddress">Email</label>
+                                <input type="email" class="form-control" id="emailAddress" name="emailAddress" placeholder="Enter Email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="userRole">Role</label>
+                                <input type="text" class="form-control" id="userRole" name="userRole" placeholder="Enter Role" onkeydown="return /[a-z]/i.test(event.key)" required>
                             </div>
                             <div class="form-group">
                                 <label for="signupPassword">Password</label>
@@ -37,12 +44,13 @@
                                 <label for="confirmPassword">Confirm Password</label>
                                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">SignUp</button>
+                            <button id="signupSubmitBtn" type="submit" class="btn btn-primary">SignUp</button>
                         </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    
 </body>
 </html>

@@ -14,7 +14,5 @@ namespace BookManagementSystem_BMS.Models
         [Required]public Category Category { get; set; }
 
         [Required]public List<Chapter> Chapters { get; set; }
-        public int CoverPageId { get; set; }
-        public CoverPage CoverPage { get; set; }
     }
 }

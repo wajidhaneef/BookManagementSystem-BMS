@@ -35,10 +35,10 @@ namespace BookManagementSystem_BMS.Data
             .WithMany(c => c.Books)
             .HasForeignKey(b => b.CategoryID);
 
-            modelBuilder.Entity<Book>()
-            .HasOne(b => b.CoverPage)
+            modelBuilder.Entity<CoverPage>()
+            .HasOne(b => b.Book)
             .WithOne()
-            .HasForeignKey<Book>(b => b.CoverPageId);
+            .HasForeignKey<CoverPage>(b => b.BookId);
 
             modelBuilder.Entity<Chapter>()
             .HasOne(c => c.Book)

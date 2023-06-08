@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookManagementSystem_BMS.styles.css" asp-append-version="true" />
 </head>
-<body>
+<body id="mainContainer">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -56,6 +56,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
+        //$(document).ready(function () {
+        //    $('#loginModal').hide();
+        //});
         $(function () {
             $('#loginButton').click(function () {
                 $('#loginModal').modal('show');
@@ -75,8 +78,60 @@
                 $("#loginForm").show();
             });
 
-        });
+            $("#signupSubmitBtn").click(function (event) {
+                console.log("on submit");
+                let signupUsername = $("#signupUsername").val();
+                let userRole = $("#userRole").val();
+                event.preventDefault();
+                var password = $("#signupPassword").val();
+                var confirmPassword = $("#confirmPassword").val();
 
+                // Check if passwords match
+                if (password !== confirmPassword) {
+                    // Display an error message
+                    //$("#passwordMismatchError").text("The passwords do not match.");
+                    alert("The passwords do not match.");
+                    return;
+                }
+                else{
+                    
+                    
+                    //let signupPassword = $("#signupPassword").val();
+                    //let confirmPassword = $("#confirmPassword").val();
+                    $.ajax({
+                        url: '@Url.Action("Signup", "User")',
+                        type: 'POST',
+                        datatype: 'text',
+                        data: { signupUsername: signupUsername, userRole: userRole, signupPassword: password, confirmPassword: confirmPassword },
+                        success: function (result) {
+                            console.log("signed up");
+                            console.log(result);
+                            $('#loginModal').hide();
+                            $('.modal-backdrop').remove();
+                            //$('#loginModalBody').remove();
+                            if(result=="succes") {
+                                $.ajax({
+                                    url: '@Url.Action("Index", "Book")',
+                                    type: 'GET',
+                                    success: function (result) {
+                                        $("#mainContainer").html(result);
+                                    },
+                                    error: function () {
+                                        alert("An error occurred while loading Index Page.");
+                                    }
+                                });
+                            }
+                        },
+                        error: function (result) {
+                            console.log(result)
+                            alert(result["statusText"]);
+                        }
+                    });
+                }
+            });
+            
+        });
+        
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
