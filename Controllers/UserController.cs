@@ -47,10 +47,14 @@ namespace BookManagementSystem_BMS.Controllers
 
         //    return Ok("success");
         //}
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string username, string password, bool rememberMe, string returnUrl = null)
+        
+        public ActionResult Login(string username, string password, string strRemember)
         {
+            bool rememberMe = false;
+            if (strRemember == "on")
+            {
+                rememberMe = true;
+            }
             // Validate the login credentials
             var user = _dbContext.Users.FirstOrDefault(u => u.EmailAddress == username);
 
@@ -66,6 +70,7 @@ namespace BookManagementSystem_BMS.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, (user.RoleID).ToString())
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -78,7 +83,7 @@ namespace BookManagementSystem_BMS.Controllers
                 ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30) 
             };
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
+            HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
 
 
             return Ok("success");
@@ -97,51 +102,53 @@ namespace BookManagementSystem_BMS.Controllers
         // POST: User/Create
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        public ActionResult Signup(string signupUsername, string emailAddress, string userRole, string signupPassword, string confirmPassword)
+        public ActionResult Signup(string signupUsername, string signupEmail, string userRole, string signupPassword, string confirmPassword)
         {
             //return Ok("wajid");
             try
             {
                 if (signupPassword != confirmPassword) return Ok("User Password does not match");
                 // Check if the username is already taken
-                if (_dbContext.Users.Any(u => u.EmailAddress == emailAddress))
+                if (_dbContext.Users.Any(u => u.EmailAddress == signupEmail))
                 {
                     ModelState.AddModelError("Username", "Username is already taken.");
                     return Ok("Your email is already registered with another account");
                 }
-                //save the role
-                Role role = new()
-                {
-                    RoleName = userRole,
-                };
 
-                //save role
-                _dbContext.Roles.Add(role);
-                _dbContext.SaveChanges();
+                //check if the role is already created
+                var role = _dbContext.Roles.FirstOrDefault(r => r.RoleName.ToLower() == userRole.ToLower());
+                if (role==null)
+                {
+                    //create the role
+                    role = new()
+                    {
+                        RoleName = userRole,
+                    };
+                    //save role
+                    _dbContext.Roles.Add(role);
+                    _dbContext.SaveChanges();
+                }
+                
                 // find the role id associated with the role
                 //int roleId = _dbContext.Roles.FirstOrDefault(r => r.RoleName.ToLower() == userRole.ToLower()).RoleID;
                 string salt = BCryptNet.GenerateSalt();
                 // Hash the password with the salt
                 string hashedPassword = BCryptNet.HashPassword(signupPassword, salt);
 
-                // Create a new user entity
+                // Create a new user
                 var user = new User
                 {
                     Username = signupUsername,
                     PasswordHash = hashedPassword,
-                    EmailAddress = emailAddress,
+                    EmailAddress = signupEmail,
                     Salt = salt,
                     RoleID = role.RoleID,
-                    // You may need to add more properties to the User entity depending on your requirements
+                    
                 };
 
                 // Save the user to the database
-                //_dbContext.Users.Add(user);
-                //_dbContext.SaveChanges();
-
-                // Redirect to a success page or login page
-
-                // Redirect to a success page or perform additional actions
+                _dbContext.Users.Add(user);
+                _dbContext.SaveChanges();
 
                 return Ok("success");
             }

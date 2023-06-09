@@ -1,4 +1,5 @@
-﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
+﻿
+@model BookManagementSystem_BMS.ViewModels.BookViewModel
 @{
     ViewData["Title"] = "Home";
 }
@@ -56,18 +57,20 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            var val = '@ViewBag.LoggedIn';
-            if (val === "loggedin") {
-                console.log('logout')
-                $('#loginButton').hide();
-            }
-            else {
-                console.log('login')
-                $('#logoutButton').hide();
-            }
-        });
+        //$(document).ready(function () {
+        //    var val = '@ViewBag.LoggedIn';
+        //    if (val === "loggedin") {
+        //        console.log('logout')
+        //        $('#loginButton').hide();
+        //    }
+        //    else {
+        //        console.log('login')
+        //        $('#logoutButton').hide();
+        //    }
+        //});
         function loadChapters() {
+            //var returnUrl = 'Request.Query["returnUrl"]';
+            //console.log("");
             console.log("load chapters")
             let bookId = $("#selectedBook").val();
             if (bookId !== "") {

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 
 namespace BookManagementSystem_BMS.Controllers
 {
@@ -25,6 +26,15 @@ namespace BookManagementSystem_BMS.Controllers
         // GET: BookController
         public IActionResult Index(string loggedin)
         {
+            //find the logged in user
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            //int roleId = int.Parse(strRoleId);
+            // find the user role id from users table
+            //int userRoleID = _dbContext.Users.FirstOrDefault(x => x.UserID == userId).RoleID;
+            // find the category id associated with the role
+            //var userCategories = _dbContext.Roles.FirstOrDefault(r => r.RoleID == roleId).Categories;
+
             var categories = _dbContext.Categories.ToList();
             var books = _dbContext.Books.ToList();
 
@@ -54,6 +64,9 @@ namespace BookManagementSystem_BMS.Controllers
                     });
                 }
             }
+            Random random = new Random();
+            CoverImages.Sort((x, y) => random.Next(-1, 2));
+
             ViewBag.LoggedIn = loggedin;
             var viewModel = new BookViewModel
             {

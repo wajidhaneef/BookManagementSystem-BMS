@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Authentication
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -12,7 +13,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Book Management System</a>
+                <a class="navbar-brand d-flex" asp-area="" asp-controller="Home" asp-action="Index">Book Management System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -25,12 +26,18 @@
                     </ul>
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item">
-                            <button id="loginButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a id="logoutButton" class="btn btn-primary" asp-controller="User" asp-action="Logout">
+                                    Logout
+                                </a>
+                            }
+                            else{
+                                <button id="loginButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
                                 Login
                             </button>
-                            <a id="logoutButton"  class="btn btn-primary" asp-controller="User" asp-action="Logout">
-                                Logout
-                            </a>
+                            }
+                            
                         </li>
                     </ul>
                 </div>
@@ -83,12 +90,13 @@
                 console.log("on submit");
                 let username = $("#username").val();
                 let password = $("#password").val();
+                let rememberMe = $("#rememberMe").val();
                 event.preventDefault();
                 $.ajax({
                     url: '@Url.Action("Login", "User")',
                     type: 'GET',
                     datatype: 'text',
-                    data: { username: username, password: password, },
+                    data: { username: username, password: password, strRemember: rememberMe },
                     success: function (result) {
                         console.log("logged in");
                         console.log(result);
@@ -132,11 +140,11 @@
             });
             //signup submit form
             $("#signupSubmitBtn").click(function (event) {
+                event.preventDefault();
                 console.log("on submit");
                 let signupUsername = $("#signupUsername").val();
-                let emailAddress = $("emailAddress").val();
+                let signupEmail = $("#signupEmail").val();
                 let userRole = $("#userRole").val();
-                event.preventDefault();
                 var password = $("#signupPassword").val();
                 var confirmPassword = $("#confirmPassword").val();
 
@@ -156,7 +164,7 @@
                         url: '@Url.Action("Signup", "User")',
                         type: 'POST',
                         datatype: 'text',
-                        data: { signupUsername: signupUsername, emailAddress: emailAddress, userRole: userRole, signupPassword: password, confirmPassword: confirmPassword },
+                        data: { signupUsername: signupUsername, signupEmail: signupEmail, userRole: userRole, signupPassword: password, confirmPassword: confirmPassword },
                         success: function (result) {
                             console.log("signed up");
                             console.log(result);
