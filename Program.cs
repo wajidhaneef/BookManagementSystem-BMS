@@ -1,4 +1,5 @@
 using BookManagementSystem_BMS.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,22 @@ builder.Services.AddDbContext<BMSContext>(options =>
     SqlServerDbContextOptionsExtensions.UseSqlServer(options, connectionString);
 });
 
+// Add authentication services
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignOutScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(options =>
+{
+    options.Cookie.Name = "BMS";
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(300); 
+    options.LoginPath = "/User/Login"; 
+    options.LogoutPath = "/User/Logout"; 
+    options.SlidingExpiration = true;
+});
 
 
 var app = builder.Build();
@@ -27,8 +44,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Book}/{action=Index}/{id?}");

@@ -56,7 +56,17 @@
 
 @section Scripts {
     <script>
-        
+        $(document).ready(function () {
+            var val = '@ViewBag.LoggedIn';
+            if (val === "loggedin") {
+                console.log('logout')
+                $('#loginButton').hide();
+            }
+            else {
+                console.log('login')
+                $('#logoutButton').hide();
+            }
+        });
         function loadChapters() {
             console.log("load chapters")
             let bookId = $("#selectedBook").val();

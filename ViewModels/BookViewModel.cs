@@ -16,5 +16,6 @@ namespace BookManagementSystem_BMS.ViewModels
         public string SelectedChapter { get; set; }
         public string SelectedChapterContent { get; set; }
         public List<CoverPageViewModel> CoverPages { get; set; }
+        public string LoggedIn { get; set;}
     }
 }

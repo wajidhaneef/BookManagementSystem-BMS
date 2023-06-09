@@ -1,9 +1,13 @@
 ﻿using BookManagementSystem_BMS.Data;
 using BookManagementSystem_BMS.Models;
 using BookManagementSystem_BMS.ViewModels;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 using BCryptNet = BCrypt.Net.BCrypt;
+using System.Security.Claims;
 
 namespace BookManagementSystem_BMS.Controllers
 {
@@ -28,27 +32,74 @@ namespace BookManagementSystem_BMS.Controllers
         }
 
         // GET: User/Login
-        public string Login(string username, string password)
+        //public ActionResult Login(string username, string password)
+        //{
+        //    return Ok("success");
+        //    var user = _dbContext.Users.FirstOrDefault(u => u.EmailAddress == username);
+
+        //    if (user == null)
+        //    {
+        //        ModelState.AddModelError("", "Invalid username or password");
+        //        return Ok("Your email is not registered");
+        //    }
+        //    bool passwordMatch = BCryptNet.Verify(password, user.PasswordHash);
+        //    if (!passwordMatch) return Ok("Your password or user name is not valid");
+
+        //    return Ok("success");
+        //}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(string username, string password, bool rememberMe, string returnUrl = null)
         {
+            // Validate the login credentials
             var user = _dbContext.Users.FirstOrDefault(u => u.EmailAddress == username);
 
             if (user == null)
             {
                 ModelState.AddModelError("", "Invalid username or password");
-                return "Your email is not registered";
+                return Ok("Your email is not registered");
             }
             bool passwordMatch = BCryptNet.Verify(password, user.PasswordHash);
-            if (!passwordMatch) return "Your password or user name is not valid";
+            if (!passwordMatch) return Ok("Your password or user name is not valid");
 
-            return "success";
+            
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, username),
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            var authenticationProperties = new AuthenticationProperties
+            {
+                IsPersistent = rememberMe, 
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30) 
+            };
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
+
+
+            return Ok("success");
         }
+
+        public async Task<IActionResult> Logout()
+        {
+            // Sign out the user
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            // Redirect to the home page or any other page
+            return RedirectToAction("Index", "Book");
+        }
+
 
         // POST: User/Create
         [HttpPost]
         //[ValidateAntiForgeryToken]
         public ActionResult Signup(string signupUsername, string emailAddress, string userRole, string signupPassword, string confirmPassword)
         {
-            return Ok("wajid");
+            //return Ok("wajid");
             try
             {
                 if (signupPassword != confirmPassword) return Ok("User Password does not match");
@@ -58,8 +109,17 @@ namespace BookManagementSystem_BMS.Controllers
                     ModelState.AddModelError("Username", "Username is already taken.");
                     return Ok("Your email is already registered with another account");
                 }
+                //save the role
+                Role role = new()
+                {
+                    RoleName = userRole,
+                };
+
+                //save role
+                _dbContext.Roles.Add(role);
+                _dbContext.SaveChanges();
                 // find the role id associated with the role
-                int roleId = _dbContext.Roles.FirstOrDefault(r => r.RoleName.ToLower() == userRole.ToLower()).RoleID;
+                //int roleId = _dbContext.Roles.FirstOrDefault(r => r.RoleName.ToLower() == userRole.ToLower()).RoleID;
                 string salt = BCryptNet.GenerateSalt();
                 // Hash the password with the salt
                 string hashedPassword = BCryptNet.HashPassword(signupPassword, salt);
@@ -71,13 +131,13 @@ namespace BookManagementSystem_BMS.Controllers
                     PasswordHash = hashedPassword,
                     EmailAddress = emailAddress,
                     Salt = salt,
-                    RoleID = roleId,
+                    RoleID = role.RoleID,
                     // You may need to add more properties to the User entity depending on your requirements
                 };
 
                 // Save the user to the database
-                _dbContext.Users.Add(user);
-                _dbContext.SaveChanges();
+                //_dbContext.Users.Add(user);
+                //_dbContext.SaveChanges();
 
                 // Redirect to a success page or login page
 

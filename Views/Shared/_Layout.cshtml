@@ -28,6 +28,9 @@
                             <button id="loginButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
                                 Login
                             </button>
+                            <a id="logoutButton"  class="btn btn-primary" asp-controller="User" asp-action="Logout">
+                                Logout
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -56,9 +59,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-        //$(document).ready(function () {
-        //    $('#loginModal').hide();
-        //});
+        
         $(function () {
             $('#loginButton').click(function () {
                 $('#loginModal').modal('show');
@@ -77,10 +78,63 @@
                 $("#signupForm").hide();
                 $("#loginForm").show();
             });
+            //login submit form
+            $("#loginSubmitBtn").click(function (event) {
+                console.log("on submit");
+                let username = $("#username").val();
+                let password = $("#password").val();
+                event.preventDefault();
+                $.ajax({
+                    url: '@Url.Action("Login", "User")',
+                    type: 'GET',
+                    datatype: 'text',
+                    data: { username: username, password: password, },
+                    success: function (result) {
+                        console.log("logged in");
+                        console.log(result);
+                        //hide the modal and login button
+                        //$('#loginButton').hide();
+                        //$('#loginModal').hide();
+                        //$('.modal-backdrop').hide();
+                        
 
+                        if (result == "success") {
+                            //clear the form input fields
+                            //$('#signupForm')[0].reset();
+                            //$("#signupForm").children('input').val('')
+                            $('#signupUsername').val('');
+                            $('#emailAddress').val('');
+                            $('#userRole').val('');
+                            $('#signupPassword').val('');
+                            $('#confirmPassword').val('');
+
+                            //show the login form
+                            $("#signupForm").hide();
+                            $("#loginForm").show();
+                            $.ajax({
+                                url: '@Url.Action("Index", "Book")',
+                                type: 'GET',
+                                data: { loggedIn: "loggedin" },
+                                success: function (result) {
+                                    $("#mainContainer").html(result);
+                                },
+                                error: function () {
+                                    alert("An error occurred while loading Index Page.");
+                                }
+                            });
+                        }
+                    },
+                    error: function (result) {
+                        console.log(result)
+                        alert(result);
+                    }
+                });
+            });
+            //signup submit form
             $("#signupSubmitBtn").click(function (event) {
                 console.log("on submit");
                 let signupUsername = $("#signupUsername").val();
+                let emailAddress = $("emailAddress").val();
                 let userRole = $("#userRole").val();
                 event.preventDefault();
                 var password = $("#signupPassword").val();
@@ -102,29 +156,31 @@
                         url: '@Url.Action("Signup", "User")',
                         type: 'POST',
                         datatype: 'text',
-                        data: { signupUsername: signupUsername, userRole: userRole, signupPassword: password, confirmPassword: confirmPassword },
+                        data: { signupUsername: signupUsername, emailAddress: emailAddress, userRole: userRole, signupPassword: password, confirmPassword: confirmPassword },
                         success: function (result) {
                             console.log("signed up");
                             console.log(result);
-                            $('#loginModal').hide();
-                            $('.modal-backdrop').remove();
+                            //$('#loginModal').hide();
+                            //$('.modal-backdrop').remove();
                             //$('#loginModalBody').remove();
-                            if(result=="succes") {
-                                $.ajax({
-                                    url: '@Url.Action("Index", "Book")',
-                                    type: 'GET',
-                                    success: function (result) {
-                                        $("#mainContainer").html(result);
-                                    },
-                                    error: function () {
-                                        alert("An error occurred while loading Index Page.");
-                                    }
-                                });
+                            if (result == "success") {
+                                $("#signupForm").hide();
+                                $("#loginForm").show();
+                                //$.ajax({
+                                //    url: '@Url.Action("Index", "Book")',
+                                //    type: 'GET',
+                                //    success: function (result) {
+                                //        $("#mainContainer").html(result);
+                                //    },
+                                //    error: function () {
+                                //        alert("An error occurred while loading Index Page.");
+                                //    }
+                                //});
                             }
                         },
                         error: function (result) {
                             console.log(result)
-                            alert(result["statusText"]);
+                            alert(result);
                         }
                     });
                 }

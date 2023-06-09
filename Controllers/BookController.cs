@@ -23,7 +23,7 @@ namespace BookManagementSystem_BMS.Controllers
             _dbContext = dbContext;
         }
         // GET: BookController
-        public IActionResult Index(string bookSearch)
+        public IActionResult Index(string loggedin)
         {
             var categories = _dbContext.Categories.ToList();
             var books = _dbContext.Books.ToList();
@@ -54,12 +54,13 @@ namespace BookManagementSystem_BMS.Controllers
                     });
                 }
             }
-            
+            ViewBag.LoggedIn = loggedin;
             var viewModel = new BookViewModel
             {
                 AllCategories = categories,
                 Books = books,
                 CoverPages = CoverImages,
+                
 
             };
             return View(viewModel);
