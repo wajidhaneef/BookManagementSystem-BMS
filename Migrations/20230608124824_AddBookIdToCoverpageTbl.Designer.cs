@@ -4,6 +4,7 @@ using BookManagementSystem_BMS.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookManagementSystem_BMS.Migrations
 {
     [DbContext(typeof(BMSContext))]
-    partial class BMSContextModelSnapshot : ModelSnapshot
+    [Migration("20230608124824_AddBookIdToCoverpageTbl")]
+    partial class AddBookIdToCoverpageTbl
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,9 +39,15 @@ namespace BookManagementSystem_BMS.Migrations
                     b.Property<int>("CategoryID")
                         .HasColumnType("int");
 
+                    b.Property<int>("CoverPageId")
+                        .HasColumnType("int");
+
                     b.HasKey("BookID");
 
                     b.HasIndex("CategoryID");
+
+                    b.HasIndex("CoverPageId")
+                        .IsUnique();
 
                     b.ToTable("Book", "BMS");
                 });
@@ -110,9 +118,6 @@ namespace BookManagementSystem_BMS.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BookId")
-                        .IsUnique();
 
                     b.ToTable("CoverPages");
                 });
@@ -194,7 +199,15 @@ namespace BookManagementSystem_BMS.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BookManagementSystem_BMS.Models.CoverPage", "CoverPage")
+                        .WithOne()
+                        .HasForeignKey("BookManagementSystem_BMS.Models.Book", "CoverPageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
+
+                    b.Navigation("CoverPage");
                 });
 
             modelBuilder.Entity("BookManagementSystem_BMS.Models.Chapter", b =>
@@ -202,17 +215,6 @@ namespace BookManagementSystem_BMS.Migrations
                     b.HasOne("BookManagementSystem_BMS.Models.Book", "Book")
                         .WithMany("Chapters")
                         .HasForeignKey("BookID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Book");
-                });
-
-            modelBuilder.Entity("BookManagementSystem_BMS.Models.CoverPage", b =>
-                {
-                    b.HasOne("BookManagementSystem_BMS.Models.Book", "Book")
-                        .WithOne()
-                        .HasForeignKey("BookManagementSystem_BMS.Models.CoverPage", "BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

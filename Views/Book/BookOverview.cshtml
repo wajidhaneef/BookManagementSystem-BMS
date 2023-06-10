@@ -1,0 +1,129 @@
+﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Categories</h4>
+        <div class="form-group">
+            <label for="selectedCategory">Select Category:</label>
+            @Html.DropDownListFor(model => model.SelectedCategoryId, new SelectList(Model.AllCategories, 
+                "CategoryID", "CategoryName"), "-- Select a category --", new { id = "categoryDropdown", 
+                @class = "form-control", onchange="loadBooks()",})
+        </div>
+
+        @*<div class="form-group">
+            <label for="selectedCategory">Select Category:</label>
+            <select id="categoryDropdown" class="form-control" onchange="loadBooks()">
+                <option value=@(Model.SelectedBookId!=-1?Model.SelectedBookId:"")>@(Model.SelectedBookId != -1 ? Model.SelectedCategory : "--Select a category --")</option>
+                @foreach (var category in Model.AllCategories)
+                {
+                    <option value="@category.CategoryID" selected="@(Model.SelectedCategoryId==category.CategoryID)?@true:@false">@category.CategoryName</option>
+                }
+            </select>
+        </div>*@
+
+        <div id="books" class="mt-4" >
+            @*<h4>Books</h4>
+            <div class="form-group">
+                <label for="selectedBook">Select Book:</label>
+                @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
+                "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
+                @class = "form-control", onchange="loadChapters()",})
+
+            </div>*@
+        </div>
+
+        <div id="chapters" class="mt-4">
+            @*<h4>Chapters</h4>
+            <div class="form-group">
+                <label for="selectedChapter">Select Chapter:</label>
+                @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
+                "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
+                @class = "form-control", onchange="loadChapterContent()",})
+            </div>*@
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <h4>Chapter Content</h4>
+        <div id="chapterContent">
+            <p>@Model.SelectedChapterContent</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            
+            loadBooks();
+            console.log("run on the load page")
+        });
+        function loadBooks() {
+            console.log("load books")
+            let categoryId = $("#categoryDropdown").val();
+            if (categoryId !== "") {
+                $.ajax({
+                    url: '@Url.Action("GetBooksByCategory")',
+                    type: 'GET',
+                    data: { categoryId: categoryId != 0 ? categoryId : @Model.SelectedCategoryId, bookId: @Model.SelectedBookId },
+                    success: function (result) {
+                        $("#books").html(result);
+                    },
+                    error: function () {
+                        alert("An error occurred while loading chapters.");
+                    }
+                }).then(() => loadChapters());
+            }
+            else {
+                $("#books").html("<option value=''>Select a Category first</option>");
+            }
+        }
+
+        
+
+        function loadChapters() {
+            console.log("load chapters")
+            let bookId = $("#selectedBook").val();
+            if (bookId !== "") {
+                $.ajax({
+                    url: '@Url.Action("GetChaptersByBook")',
+                    type: 'GET',
+                    data: { bookId: bookId, chapterId:@Model.SelectedChapterId },
+                    success: function (result) {
+                        $("#chapters").html(result);
+                        $("#chapterContent").html("<p>Select a chapter to view its content.</p>");
+                    },
+                    error: function () {
+                        alert("An error occurred while loading chapters.");
+                    }
+                }).then(()=>loadChapterContent());
+            }
+            else {
+                $("#chapterDropdown").html("<option value=''>Select a book first</option>");
+                $("#chapterContent").html("<p>Select a chapter to view its content.</p>");
+            }
+        }
+
+        function loadChapterContent() {
+            console.log("load chapters")
+            let chapterId = $("#selectedChapter").val();
+            if (chapterId !== "") {
+                $.ajax({
+                    url: '@Url.Action("GetChapterContent")',
+                    type: 'GET',
+                    data: { chapterId: chapterId != 0 ? chapterId : @Model.SelectedChapterId },
+                    success: function (result) {
+                        $("#chapterContent").html("<p>" + result + "</p>");
+                    },
+                    error: function () {
+                        alert("An error occurred while loading chapter content.");
+                    }
+                });
+            }
+            else {
+                $("#chapterContent").html("<p>Select a chapter to view its content.</p>");
+            }
+        }
+
+    </script>
+}

@@ -1,0 +1,19 @@
+﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
+
+<h4>Chapters</h4>
+<div class="form-group">
+    <label for="selectedChapter">Select Chapter:</label>
+    @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
+    "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
+    @class = "form-control", onchange="loadChapterContent()"})
+</div>
+
+@*
+<select id="selectedChapter" class="form-control" onchange="loadChapterContent()">
+    <option value="">Select a Chapter</option>
+    @foreach (var chapter in Model)
+    {
+        <option value="@chapter.ChapterID">@chapter.ChapterName</option>
+    }
+</select>
+*@
