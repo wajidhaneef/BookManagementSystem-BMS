@@ -6,41 +6,51 @@
 
 <div style="display: flex; flex-direction: column; height: 100vh;">
     <div style="flex: 1; display: flex; border:10px;" class="border">
-        <div style="flex: 1; padding: 10px;" class="border">
-            <h2>Categories</h2>
-            <ul>
-                @foreach (var category in Model.AllCategories)
-                {
-                    <li>
-                        <a href="@Url.Action("Details", new { categoryId = category.CategoryID })">
-                            @category.CategoryName
-                        </a>
-                    </li>
-                }
-            </ul>
-        </div>
-        <div style="flex: 1; padding: 10px;" class="border">
-            <h4>Books</h4>
-            <div class="form-group">
-                <label for="selectedBook">Select Book:</label>
-                @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
-                "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
-                @class = "form-control", onchange="loadChapters()",})
-
+        
+        <form id="loginFormContent" action="@Url.Action("BookOverview", "Book")" method="get" style="flex: 1; display: flex; border:10px;" class="border">
+            @Html.HiddenFor(model => model.AllCategories)
+        @Html.HiddenFor(model => model.Books)
+        @Html.HiddenFor(model => model.Chapters)
+        @Html.HiddenFor(model => model.CoverPages)
+            <div style="flex: 1; padding: 10px;" class="border">
+                <h2>Categories</h2>
+                <ul>
+                    @foreach (var category in Model.AllCategories)
+                    {
+                        <li>
+                            <a href="@Url.Action("Details",  new {categoryId = category.CategoryID} )">
+                                @category.CategoryName
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
-            <div class="form-group">
-                <div id="chapters">
-                    <h4>Chapters</h4>
-                    <div >
-                        <label for="selectedChapter">Select Chapter:</label>
-                        <select>
-                            <option value="" >--- Select Chapter ---</option>
-                        </select>
+            <div style="flex: 1; padding: 10px;" class="border">
+                <div>
+                    <h4>Books</h4>
+                    <div class="form-group">
+                        <label for="selectedBook">Select Book:</label>
+                        @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
+                        "BookID", "BookName"), "-- Select a Book --", new { id = "@model.SelectedBookId",
+                        @class = "form-control", onchange="loadChapters()"})
+
                     </div>
                 </div>
-                <button class="btn btn-primary" type="submit" onclick="loadOverview()">Submit</button>
+                <div class="form-group">
+                    <div id="chapters">
+                        <h4>Chapters</h4>
+                        <div class="form-group">
+                            <label for="selectedChapter">Select Chapter:</label>
+                            @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters.Where(c=>c.BookID==Model.SelectedBookId).ToList(),
+                            "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "@model.SelectedChapterId",
+                            @class = "form-control", onchange="loadChapterContent()"})
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit" >Submit</button>
+                </div>
+
             </div>
-        </div>
+        </form>
     </div>
     <div style="flex: 1; padding: 10px;" class="border">
         <h2>Random Book Images</h2>
@@ -90,7 +100,8 @@
                 $("#chapters").html("<option value=''>Select a book first</option>");
             }
         }
-        function loadOverview() {
+        function loadOverview(event) {
+            console.log(event);
             console.log("Load Content")
             let bookId = $("#selectedBook").val();
             let chapterId = $("#selectedChapter").val();
@@ -100,7 +111,7 @@
                     type: 'GET',
                     data: { bookId: bookId, categoryId:-1, chapterId: chapterId, home:1},
                     success: function (result) {
-                        $("#mainContainer").html(result);
+                        //$("#mainContainer").html(result);
                     },
                     error: function () {
                         alert("An error occurred while loading chapters.");

@@ -20,26 +20,22 @@
                 }
             </select>
         </div>*@
+        <div id="books" class="mt-4">
+        <h4>Books</h4>
+        <div class="form-group">
+            <label for="selectedBook">Select Book:</label>
+            @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
+            "BookID", "BookName"), "-- Select a Book --", new { id = "@model.SelectedBookId",
+            @class = "form-control", onchange="loadChapters()"})
 
-        <div id="books" class="mt-4" >
-            @*<h4>Books</h4>
-            <div class="form-group">
-                <label for="selectedBook">Select Book:</label>
-                @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
-                "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
-                @class = "form-control", onchange="loadChapters()",})
-
-            </div>*@
         </div>
 
-        <div id="chapters" class="mt-4">
-            @*<h4>Chapters</h4>
-            <div class="form-group">
-                <label for="selectedChapter">Select Chapter:</label>
-                @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
-                "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
-                @class = "form-control", onchange="loadChapterContent()",})
-            </div>*@
+        <h4>Chapters</h4>
+        <div class="form-group">
+            <label for="selectedChapter">Select Chapter:</label>
+            @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
+            "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
+            @class = "form-control", onchange="loadChapterContent()"})
         </div>
     </div>
 
