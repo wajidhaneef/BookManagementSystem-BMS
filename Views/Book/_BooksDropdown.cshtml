@@ -4,9 +4,8 @@
 <div class="form-group">
     <label for="selectedBook">Select Book:</label>
     @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
-    "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
-    @class = "form-control", onchange="loadChapters()",})
-    
+    "BookID", "BookName"), "-- Select a Book --", new { id = "bookId",
+    @class = "form-control", onchange="loadChapters()"})
 </div>
 @*<div id="booksDropdwon" class="form-group">
     <label for="booksDropdwon">Select Category:</label>

@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
 </head>
@@ -10,8 +11,8 @@
                     <div id="loginForm">
                         <form id="loginFormContent" action="@Url.Action("Login", "User")" method="get">
                             <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="email" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                                <label for="username">Email</label>
+                                <input type="email" class="form-control" id="username" name="username" placeholder="Enter Email" required>
                             </div>
                             <div class="form-group">
                                 <label for="password">Password</label>
@@ -29,8 +30,8 @@
                         <button id="backButton" class="btn btn-primary">Back to Login</button>
                         <form id="signupFormContent" action="@Url.Action("Signup", "User")" method="post" onSubmitHandle()>
                             <div class="form-group">
-                                <label for="signupUsername">Username</label>
-                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter username" onkeydown="return /[a-z]/i.test(event.key)" required>
+                                <label for="signupUsername">Full Name</label>
+                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter Full Name" onkeydown="return /[a-z]/i.test(event.key)" required>
                             </div>
                             <div class="form-group">
                                 <label for="signupEmail">Email</label>
