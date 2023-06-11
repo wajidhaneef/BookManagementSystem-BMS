@@ -39,7 +39,7 @@ namespace BookManagementSystem_BMS.Controllers
             var books = _dbContext.Books.ToList();
             var chapters = _dbContext.Chapters.ToList();
             var coverpages = _dbContext.CoverPages.ToList();
-            var roles = _dbContext.Roles.ToList();
+            ViewBag.Roles = _dbContext.Roles.ToList();
             List<CoverPageViewModel> CoverImages = new List<CoverPageViewModel>();
             foreach (var coverPage in coverpages)
             {
@@ -83,8 +83,8 @@ namespace BookManagementSystem_BMS.Controllers
                 SelectedChapter = chapters.First().ChapterName,
                 SelectedChapterContent = chapters.First().Content,
                 CoverPages = CoverImages,
-                Roles = roles,
-                SelectedRoleId = roles.First().RoleID,
+                //Roles = roles,
+                //SelectedRoleId = roles.First().RoleID,
                 
 
             };
@@ -99,7 +99,9 @@ namespace BookManagementSystem_BMS.Controllers
             var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
             int bookId = books.First().BookID;
             var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
-            var roles = _dbContext.Roles.ToList();
+
+            ViewBag.Roles = _dbContext.Roles.ToList();
+
             var categories = _dbContext.Categories.ToList();
             viewModel.AllCategories = categories;
             viewModel.Books = books;
@@ -108,8 +110,8 @@ namespace BookManagementSystem_BMS.Controllers
             viewModel.Chapters = chapters;
             viewModel.SelectedChapterId = chapters.First().ChapterID;
             viewModel.SelectedChapterContent = chapters.First().Content;
-            viewModel.Roles = roles;
-            viewModel.SelectedRoleId = roles.First().RoleID;
+            //viewModel.Roles = roles;
+            //viewModel.SelectedRoleId = roles.First().RoleID;
             //var viewModel = new BookViewModel
             //{
             //    AllCategories = categories,
@@ -133,7 +135,9 @@ namespace BookManagementSystem_BMS.Controllers
             var categories = _dbContext.Categories.ToList();
             var books = _dbContext.Books.Where(b=>b.CategoryID==categoryId).ToList();
             var chapters = _dbContext.Chapters.Where(c=>c.BookID==bookId).ToList();
-            var roles = _dbContext.Roles.ToList();
+
+            //ViewBag.Roles = _dbContext.Roles.ToList();
+
             var viewModel = new BookViewModel
             {
                 AllCategories = categories,
@@ -143,8 +147,8 @@ namespace BookManagementSystem_BMS.Controllers
                 SelectedBookId = bookId,
                 SelectedChapterId = chapterId == 0 ? chapters.First().ChapterID : chapterId,
                 SelectedChapterContent = chapters.FirstOrDefault(c=>c.ChapterID==chapterId, chapters.First()).Content,
-                Roles = roles,
-                SelectedRoleId = roles.First().RoleID
+                //Roles = roles,
+                //SelectedRoleId = roles.First().RoleID
 
             };
 
@@ -158,9 +162,7 @@ namespace BookManagementSystem_BMS.Controllers
             viewModel.Books = _dbContext.Books.ToList();
             viewModel.Chapters = _dbContext.Chapters.Where(c=>c.BookID==viewModel.SelectedBookId).ToList();
             viewModel.SelectedChapterContent = viewModel.Chapters.FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
-            viewModel.Roles = _dbContext.Roles.ToList();
-            viewModel.SelectedRoleId = viewModel.Roles.First().RoleID;
-            //viewModel.SelectedCategoryId = viewModel.Books.FirstOrDefault(b => b.BookID == viewModel.SelectedBookId).CategoryID;
+
 
             return View("BookOverview", viewModel);
         }
@@ -169,7 +171,9 @@ namespace BookManagementSystem_BMS.Controllers
         {
             viewModel.Books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
             viewModel.SelectedBookId = viewModel.Books.First().BookID;
-            viewModel.Roles = _dbContext.Roles.ToList();
+
+            ViewBag.Roles = _dbContext.Roles.ToList();
+
             viewModel.SelectedRoleId = viewModel.Roles.First().RoleID;
             //var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
             //var viewModel = new BookViewModel
@@ -194,8 +198,7 @@ namespace BookManagementSystem_BMS.Controllers
             viewModel.SelectedChapterContent = viewModel.Chapters.First().Content;
             viewModel.SelectedBookId = bookId;
             viewModel.SelectedCategoryId = categoryId;
-            viewModel.Roles = _dbContext.Roles.ToList();
-            viewModel.SelectedRoleId = viewModel.Roles.First().RoleID;
+
             //var viewModel = new BookViewModel
             //{
             //    Chapters = chapters,
@@ -254,7 +257,7 @@ namespace BookManagementSystem_BMS.Controllers
                     //_dbContext.Update(book);
                     await _dbContext.SaveChangesAsync();
                     // Return a success message or redirect to another page
-                    return RedirectToAction("Index");
+                    return View();
                 }
             }
 

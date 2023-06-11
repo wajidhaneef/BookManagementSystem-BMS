@@ -32,7 +32,7 @@ namespace BookManagementSystem_BMS.Controllers
         [HttpPost]
         public ActionResult LoginPage(UserViewModel userViewModel)
         {
-            
+            ViewBag.Roles = _dbContext.Roles.ToList();
             // Validate the login credentials
             var user = _dbContext.Users.FirstOrDefault(u => u.EmailAddress == userViewModel.EmailAddress);
 
@@ -72,6 +72,7 @@ namespace BookManagementSystem_BMS.Controllers
         public ActionResult SignupPage()
         {
             var roles = _dbContext.Roles.ToList();
+            ViewBag.Roles = roles;
             var userView = new UserViewModel()
             {
                 Roles = roles,

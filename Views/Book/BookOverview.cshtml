@@ -39,8 +39,8 @@
         </form>
     </div>
 
-    <div class="col-md-6">
-        <h4>Chapter Content</h4>
+    <div class="col-md-6" >
+        <h4 style="text-align:center;">Chapter Content</h4>
         <div id="chapterContent">
             <p>@Model.SelectedChapterContent</p>
         </div>
@@ -54,6 +54,24 @@
             //loadBooks();
             console.log("run on the load page")
         });
+        function logOut() {
+                $.ajax({
+                    url: '@Url.Action("Logout", "User")',
+                    type: 'GET',
+                    datatype: 'text',
+                    success: function (result) {
+                        console.log(result);
+                        if (result == "loggedout") {
+                            location.reload();
+                        }
+                    },
+                    error: function (result) {
+                        console.log(result)
+                        alert(result);
+                    }
+                });
+            }
+
         function loadBooks() {
             console.log("load books")
                 let categoryId = $("#categoryId").val();

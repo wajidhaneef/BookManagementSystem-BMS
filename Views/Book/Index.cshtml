@@ -67,7 +67,24 @@
 </div>
 @section Scripts {
     <script>
-        
+        function logOut() {
+            $.ajax({
+                url: '@Url.Action("Logout", "User")',
+                type: 'GET',
+                datatype: 'text',
+                success: function (result) {
+                    console.log(result);
+                    if (result == "loggedout") {
+                        location.reload();
+                    }
+                },
+                error: function (result) {
+                    console.log(result)
+                    alert(result);
+                }
+            });
+        }
+
         function loadChapters() {
             //var returnUrl = 'Request.Query["returnUrl"]';
             //console.log("");
