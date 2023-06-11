@@ -12,8 +12,8 @@
 <body id="mainContainer">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand d-flex" asp-area="" asp-controller="Home" asp-action="Index">Book Management System</a>
+            <div class="container-fluid d-flex">
+                <a class="navbar-brand " style="margin-left: 40%;" asp-area="" asp-controller="Book" asp-action="Index">Book Management System</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -28,7 +28,7 @@
                         <li class="nav-item">
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <a id="logoutButton" class="btn btn-primary" asp-controller="User" asp-action="Logout">
+                                <a id="logoutButton" class="btn btn-primary" onclick="logOut()">
                                     Logout
                                 </a>
                             }
@@ -66,11 +66,42 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-        
-        $(function () {
+        $(document).ready(function (){
+            var url = window.location.href;
+            console.log(url);
+            if (url === "https://localhost:7030/User/LoginPage" || url === "https://localhost:7030/User/SignupPage") {
+                $('#loginButton').hide();
 
+            }
+        });
+        $(function () {
+            function logOut(){
+                $.ajax({
+                    url: '@Url.Action("Signup", "User")',
+                    type: 'POST',
+                    datatype: 'text',
+                    data: { signupUsername: signupUsername, signupEmail: signupEmail, userRole: userRole, signupPassword: password, confirmPassword: confirmPassword },
+                    success: function (result) {
+                        console.log(result);
+                        if (result == "loggedout") {
+                            location.reload();
+                        }
+                    },
+                    error: function (result) {
+                        console.log(result)
+                        alert(result);
+                    }
+                });
+            }
             $('#loginButton').click(function () {
-                $('#loginModal').modal('show');
+                var url = window.location.href;
+                console.log(url);
+                if (url !== "https://localhost:7030/"){
+                    $('#loginModal').modal('show');
+                }
+                else{
+                    window.location.href = "https://localhost:7030/User/LoginPage";
+                }
             });
             //$('#closeModal').click(function () {
             //    $('#loginModal').modal('hide');
@@ -145,20 +176,22 @@
                 console.log("on submit");
                 let signupUsername = $("#signupUsername").val();
                 let signupEmail = $("#signupEmail").val();
-                let userRole = $("#userRole").val();
+                let userRole = $("#roleId").val();
                 var password = $("#signupPassword").val();
                 var confirmPassword = $("#confirmPassword").val();
+                var passwordPattern = /^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)).+$/;
 
                 // Check if passwords match
-                if (password !== confirmPassword) {
+                if (!passwordPattern.test(password)) {
                     // Display an error message
                     //$("#passwordMismatchError").text("The passwords do not match.");
-                    alert("The passwords do not match.");
+                    $("#passwordError").html("The Password must contain a small letter, a capital letter, a number and a special character");
                     return;
                 }
+                else if(password!==confirmPassword){
+                    $("#passwordError").html("The confirm password does not match");
+                }
                 else{
-                    
-                    
                     //let signupPassword = $("#signupPassword").val();
                     //let confirmPassword = $("#confirmPassword").val();
                     $.ajax({

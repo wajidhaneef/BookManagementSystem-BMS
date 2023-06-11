@@ -1,4 +1,4 @@
-﻿
+﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,17 +37,26 @@
                                 <label for="signupEmail">Email</label>
                                 <input type="email" class="form-control" id="signupEmail" name="signupEmail" placeholder="Enter email" required>
                             </div>
-                            <div class="form-group">
+                            @*<div class="form-group">
                                 <label for="userRole">Role</label>
                                 <input type="text" class="form-control" id="userRole" name="userRole" placeholder="Enter Role" onkeydown="return /[a-z]/i.test(event.key)" required>
+                            </div>*@
+                            <div class="form-group">
+                                <label for="selectedRole">Select Role:</label>
+                                @Html.DropDownListFor(model => model.SelectedRoleId, new SelectList(Model.Roles,
+                                "RoleID", "RoleName"), "-- Select a Role --", new { id = "roleId",
+                                @class = "form-control",})
+                                <span id="roleError"></span>
                             </div>
                             <div class="form-group">
                                 <label for="signupPassword">Password</label>
                                 <input type="password" class="form-control" id="signupPassword" name="signupPassword" placeholder="Enter password" required>
+                                
                             </div>
                             <div class="form-group">
                                 <label for="confirmPassword">Confirm Password</label>
                                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+                                <span id="passwordError"></span>
                             </div>
                             <button id="signupSubmitBtn" type="submit" class="btn btn-primary">SignUp</button>
                         </form>
