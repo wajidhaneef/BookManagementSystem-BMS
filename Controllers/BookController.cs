@@ -152,13 +152,18 @@ namespace BookManagementSystem_BMS.Controllers
             // parse the id
             if (!string.IsNullOrEmpty(strRoleId))
             {
+                var categories = _dbContext.Categories.ToList();
                 var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                if (books.Count == 0)
+                {
+                    categoryId = categories.First().CategoryID;
+                    books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                }
                 int bookId = books.First().BookID;
                 var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
 
-                ViewBag.Roles = _dbContext.Roles.ToList();
 
-                var categories = _dbContext.Categories.ToList();
+                
                 viewModel.AllCategories = categories;
                 viewModel.Books = books;
                 viewModel.SelectedCategoryId = categoryId;
@@ -172,12 +177,16 @@ namespace BookManagementSystem_BMS.Controllers
             }
             else
             {
+                var categories = DummyDataGenerator.GenerateCategories().ToList();
                 var books = DummyDataGenerator.GenerateBooks().Where(b => b.CategoryID == categoryId).ToList();
+                if (books.Count == 0)
+                {
+                    categoryId = categories.First().CategoryID;
+                    books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                }
                 int bookId = books.First().BookID;
                 var chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
 
-
-                var categories = DummyDataGenerator.GenerateCategories().ToList();
                 viewModel.AllCategories = categories;
                 viewModel.Books = books;
                 viewModel.SelectedCategoryId = categoryId;
@@ -202,8 +211,18 @@ namespace BookManagementSystem_BMS.Controllers
             {
                 var categories = _dbContext.Categories.ToList();
                 var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                if (books.Count == 0)
+                {
+                    categoryId = categories.First().CategoryID;
+                    books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                }
                 var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
-
+                if (chapters.Count == 0)
+                {
+                    bookId = books.First().BookID;
+                    chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+                    chapterId = chapters.First().ChapterID;
+                }
 
                 var viewModel = new BookViewModel
                 {
@@ -225,8 +244,18 @@ namespace BookManagementSystem_BMS.Controllers
             {
                 var categories = DummyDataGenerator.GenerateCategories().ToList();
                 var books = DummyDataGenerator.GenerateBooks().Where(b => b.CategoryID == categoryId).ToList();
+                if (books.Count == 0)
+                {
+                    categoryId = categories.First().CategoryID;
+                    books = DummyDataGenerator.GenerateBooks().Where(b => b.CategoryID == categoryId).ToList();
+                }
                 var chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
-
+                if (chapters.Count==0)
+                {
+                    bookId = books.First().BookID;
+                    chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
+                    chapterId = chapters.First().ChapterID;
+                }
 
                 var viewModel = new BookViewModel
                 {
@@ -237,9 +266,7 @@ namespace BookManagementSystem_BMS.Controllers
                     SelectedBookId = bookId,
                     SelectedChapterId = chapterId == 0 ? chapters.First().ChapterID : chapterId,
                     SelectedChapterContent = chapters.FirstOrDefault(c => c.ChapterID == chapterId, chapters.First()).Content,
-                    //Roles = roles,
-                    //SelectedRoleId = roles.First().RoleID
-
+                    
                 };
 
                 return View("BookOverview", viewModel);
@@ -258,10 +285,11 @@ namespace BookManagementSystem_BMS.Controllers
                 var books = _dbContext.Books.ToList();
                 viewModel.Books = books;
                 var chapters = _dbContext.Chapters.Where(c => c.BookID == viewModel.SelectedBookId).ToList();
-                if (chapters == null)
+                if (chapters.Count == 0)
                 {
                     var bookId = books.First().BookID;
                     chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+                    viewModel.SelectedChapterId = chapters.First().ChapterID;
                 }
                 viewModel.Chapters = chapters;
                 viewModel.SelectedChapterContent = viewModel.Chapters.FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
@@ -274,10 +302,11 @@ namespace BookManagementSystem_BMS.Controllers
                 var books = DummyDataGenerator.GenerateBooks().ToList();
                 viewModel.Books = books;
                 var chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == viewModel.SelectedBookId).ToList();
-                if (chapters == null)
+                if (chapters.Count == 0)
                 {
                     var bookId = books.First().BookID;
                     chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
+                    viewModel.SelectedChapterId = chapters.First().ChapterID;
                 }
                 viewModel.Chapters = chapters;
                 viewModel.SelectedChapterContent = DummyDataGenerator.GenerateChapters().FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
