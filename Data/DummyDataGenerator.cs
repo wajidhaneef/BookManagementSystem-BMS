@@ -53,9 +53,9 @@ namespace BookManagementSystem_BMS.Data
         {
             var coverPages = new List<CoverPage>
             {
-                new CoverPage { Id = 1, BookId = 1, ImageData = GetImageData("cover1.jpg") },
-                new CoverPage { Id = 2, BookId = 2, ImageData = GetImageData("cover2.jpg") },
-                new CoverPage { Id = 3, BookId = 3, ImageData = GetImageData("cover3.jpg") },
+                new CoverPage { Id = 1, BookId = 1, ImageData = GetImageData("/ASP.NET MVC TRAINING/BookManagementSystem-BMS/wwwroot/Covers/cover1.jpg") },
+                new CoverPage { Id = 2, BookId = 2, ImageData = GetImageData("/ASP.NET MVC TRAINING/BookManagementSystem-BMS/wwwroot/Covers/cover2.jpg") },
+                new CoverPage { Id = 3, BookId = 3, ImageData = GetImageData("/ASP.NET MVC TRAINING/BookManagementSystem-BMS/wwwroot/Covers/cover3.jpg") },
                 // Add more cover pages as needed
             };
 

@@ -1,8 +1,8 @@
 ﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
 
 
-<div class="row">
-    <div class="col-md-6">
+<div class="row border">
+    <div class="col-md-6 border">
 
         <form id="loginFormContent" action="@Url.Action("BookOverview", "Book")">
             @Html.HiddenFor(model => model.SelectedCategoryId)
@@ -27,7 +27,7 @@
 
                 </div>
             </div>
-                <div id="chapters" class="mt-4">
+                <div id="chapters" class="mt-4 mb-2">
                 <h4>Chapters</h4>
                 <div class="form-group">
                     <label for="selectedChapter">Select Chapter:</label>
@@ -39,7 +39,7 @@
         </form>
     </div>
 
-    <div class="col-md-6" >
+    <div class="col-md-6 border" >
         <h4 style="text-align:center;">Chapter Content</h4>
         <div id="chapterContent">
             <p>@Model.SelectedChapterContent</p>

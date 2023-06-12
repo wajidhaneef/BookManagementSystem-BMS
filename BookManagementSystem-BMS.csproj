@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Identity.Samples" Version="1.0.6" />
+    <PackageReference Include="jQuery.Validation" Version="1.19.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
@@ -26,6 +27,12 @@
 
   <ItemGroup>
     <Folder Include="Data\Covers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\Covers\cover1.jpg" />
+    <None Include="wwwroot\Covers\cover2.jpg" />
+    <None Include="wwwroot\Covers\cover3.jpg" />
   </ItemGroup>
 
 </Project>

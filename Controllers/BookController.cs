@@ -97,8 +97,6 @@ namespace BookManagementSystem_BMS.Controllers
                     SelectedChapter = chapters.First().ChapterName,
                     SelectedChapterContent = chapters.First().Content,
                     CoverPages = CoverImages,
-                    //Roles = roles,
-                    //SelectedRoleId = roles.First().RoleID,
 
 
                 };
@@ -209,8 +207,26 @@ namespace BookManagementSystem_BMS.Controllers
             // parse the id
             if (!string.IsNullOrEmpty(strRoleId))
             {
-                var categories = _dbContext.Categories.ToList();
-                var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                int roleId = int.Parse(strRoleId);
+                var role = _dbContext.Roles
+                    .Include(r => r.Categories)
+                    .FirstOrDefault(r => r.RoleID == roleId);
+                var categories = role.Categories;
+
+                var categoryIds = categories.Select(c => c.CategoryID).ToList();
+                //var categories = _dbContext.Categories.ToList();
+                var books = new List<Book>();
+                if (!categoryIds.Contains(categoryId))
+                {
+                    books = _dbContext.Books
+                    .Include(b => b.Category)
+                    .Where(b => categoryIds.Contains(b.CategoryID))
+                    .ToList();
+                }
+                else
+                {
+                    books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                }
                 if (books.Count == 0)
                 {
                     categoryId = categories.First().CategoryID;
@@ -233,8 +249,7 @@ namespace BookManagementSystem_BMS.Controllers
                     SelectedBookId = bookId,
                     SelectedChapterId = chapterId == 0 ? chapters.First().ChapterID : chapterId,
                     SelectedChapterContent = chapters.FirstOrDefault(c => c.ChapterID == chapterId, chapters.First()).Content,
-                    //Roles = roles,
-                    //SelectedRoleId = roles.First().RoleID
+                    
 
                 };
 
@@ -325,10 +340,6 @@ namespace BookManagementSystem_BMS.Controllers
                 viewModel.Books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
                 viewModel.SelectedBookId = viewModel.Books.First().BookID;
 
-                ViewBag.Roles = _dbContext.Roles.ToList();
-
-                viewModel.SelectedRoleId = viewModel.Roles.First().RoleID;
-                
                 return PartialView("_BooksDropdown", viewModel);
             }
             else

@@ -190,7 +190,7 @@ namespace BookManagementSystem_BMS.Controllers
         // POST: User/Create
         [HttpPost]
         //[ValidateAntiForgeryToken]
-        public ActionResult Signup(string signupUsername, string signupEmail, string userRole, string signupPassword, string confirmPassword)
+        public ActionResult Signup(string signupUsername, string signupEmail, int userRole, string signupPassword, string confirmPassword)
         {
             //return Ok("wajid");
             try
@@ -203,20 +203,7 @@ namespace BookManagementSystem_BMS.Controllers
                     return Ok("Your email is already registered with another account");
                 }
 
-                //check if the role is already created
-                var role = _dbContext.Roles.FirstOrDefault(r => r.RoleName.ToLower() == userRole.ToLower());
-                if (role==null)
-                {
-                    //create the role
-                    role = new()
-                    {
-                        RoleName = userRole,
-                    };
-                    //save role
-                    _dbContext.Roles.Add(role);
-                    _dbContext.SaveChanges();
-                }
-
+                
                 // find the role id associated with the role
                 //int roleId = _dbContext.Roles.FirstOrDefault(r => r.RoleName.ToLower() == userRole.ToLower()).RoleID;
                 string salt = BCryptNet.GenerateSalt();
@@ -231,7 +218,7 @@ namespace BookManagementSystem_BMS.Controllers
                     PasswordHash = hashedPassword,
                     EmailAddress = signupEmail,
                     Salt = salt,
-                    RoleID = role.RoleID,
+                    RoleID = userRole,
                     
                 };
 

@@ -13,7 +13,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid d-flex">
-                <a class="navbar-brand " style="margin-left: 30%;" asp-area="" asp-controller="Book" asp-action="Index"><b>Hi @User.Identity.Name, Welcome to Book Management System</b></a>
+                <a class="navbar-brand " style="margin-left: 30%;" asp-area="" asp-controller="Book" asp-action="Index">Hi <b>@User.Identity.Name</b>, Welcome to <b>Book Management System</b></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -54,7 +54,7 @@
         @Html.Partial("Login/_LoginModal")
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - BookManagementSystem_BMS - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2023 - BookManagementSystem_BMS - <a asp-area="" >Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -77,10 +77,11 @@
                 $(this).find('form').trigger('reset');
             })
         });
+        
         //reset the form
         $('#loginModal').on('hidden.bs.modal', function () {
             $(this).find('form').trigger('reset');
-        })
+        });
         $(function () {
             
             $('#loginButton').click(function () {
@@ -180,7 +181,7 @@
                 console.log("on submit");
                 let signupUsername = $("#signupUsername").val();
                 let signupEmail = $("#signupEmail").val();
-                let userRole = $("#roleId").val();
+                var userRole = $("#roleId").val();
                 var password = $("#signupPassword").val();
                 var confirmPassword = $("#confirmPassword").val();
 
@@ -194,11 +195,12 @@
                 //email validation
                 if(signupEmail===null || signupEmail===""){
                     $("#emailError").html("The email is required");
+                    return;
                 }
                 //role validation
-                if(userRole==="0"){
+                if(userRole===0){
                     $("#roleError").html("The user role is required");
-                    
+                    return;
                 }
                 // Check if passwords match
                 if (!passwordPattern.test(password)) {
