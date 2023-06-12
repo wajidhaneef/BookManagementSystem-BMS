@@ -51,7 +51,8 @@ namespace BookManagementSystem_BMS.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, userViewModel.EmailAddress),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, userViewModel.EmailAddress),
                 new Claim(ClaimTypes.Role, (user.RoleID).ToString())
             };
 
@@ -156,7 +157,8 @@ namespace BookManagementSystem_BMS.Controllers
             
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, username),
                 new Claim(ClaimTypes.Role, (user.RoleID).ToString())
             };
 
