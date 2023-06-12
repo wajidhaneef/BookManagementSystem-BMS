@@ -12,6 +12,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
+using static System.Reflection.Metadata.BlobBuilder;
 
 namespace BookManagementSystem_BMS.Controllers
 {
@@ -26,69 +27,119 @@ namespace BookManagementSystem_BMS.Controllers
         // GET: BookController
         public IActionResult Index(string loggedin)
         {
-            //find the logged in user
+            //find the logged in user role
             string strRoleId = User.FindFirstValue(ClaimTypes.Role);
             // parse the id
-            //int roleId = int.Parse(strRoleId);
-            // find the user role id from users table
-            //int userRoleID = _dbContext.Users.FirstOrDefault(x => x.UserID == userId).RoleID;
-            // find the category id associated with the role
-            //var userCategories = _dbContext.Roles.FirstOrDefault(r => r.RoleID == roleId).Categories;
-
-            var categories = _dbContext.Categories.ToList();
-            var books = _dbContext.Books.ToList();
-            var chapters = _dbContext.Chapters.ToList();
-            var coverpages = _dbContext.CoverPages.ToList();
-            ViewBag.Roles = _dbContext.Roles.ToList();
-            List<CoverPageViewModel> CoverImages = new List<CoverPageViewModel>();
-            foreach (var coverPage in coverpages)
+            if (!string.IsNullOrEmpty(strRoleId))
             {
-                if (coverPage != null)
+                int roleId = int.Parse(strRoleId);
+                var role = _dbContext.Roles
+                    .Include(r => r.Categories) 
+                    .FirstOrDefault(r => r.RoleID == roleId);
+                var categoriesAssociated = role.Categories;
+
+                var categoryIds = categoriesAssociated.Select(c => c.CategoryID).ToList();
+                //var categories = _dbContext.Categories.ToList();
+                var books = _dbContext.Books
+                    .Include(b => b.Category)
+                    .Where(b => categoryIds.Contains(b.CategoryID))
+                    .ToList();
+                var selectedBook = books.First();
+                var chapters = _dbContext.Chapters.Where(c=>c.BookID==selectedBook.BookID).ToList();
+                var bookIds = books.Select(b=>b.BookID).ToList();
+
+                var coverpages = _dbContext.CoverPages
+                    .Include(cp => cp.Book)
+                    .Where(cp => bookIds.Contains(cp.BookId))
+                    .ToList();
+
+                List<CoverPageViewModel> CoverImages = new List<CoverPageViewModel>();
+                foreach (var coverPage in coverpages)
                 {
-                    // Create a memory stream from the image data
-                    //var arr = coverPage.ImageData.ToArray();
-                    //var stream = new MemoryStream(coverPage.ImageData);
-                    byte[] imgBytes = (byte[])coverPage.ImageData;
+                    if (coverPage != null)
+                    {
+                        // Create a memory stream from the image data
+                        //var arr = coverPage.ImageData.ToArray();
+                        //var stream = new MemoryStream(coverPage.ImageData);
+                        byte[] imgBytes = (byte[])coverPage.ImageData;
 
-                    //If you want convert to a bitmap file
-                    TypeConverter tc = TypeDescriptor.GetConverter(typeof(Bitmap));
-                    //Bitmap MyBitmap = (Bitmap)tc.ConvertFrom(imgBytes);
-                    // Set the content type based on the file extension
-                    //var contentType = GetContentType(coverPage.ImageMimeType);
-                    //Image img = Image.FromStream(stream, false, true);
-                    // Return the image as a file result
-                    CoverImages.Add(new CoverPageViewModel{
-                        //CoverImage = MyBitmap, BookId=coverPage.BookId,
-                        BookName= books.FirstOrDefault(b=>b.BookID==coverPage.BookId).BookName,
-                        CategoryId = books.FirstOrDefault(b => b.BookID == coverPage.BookId).CategoryID,
-                        ImageContent = imgBytes,
-                        BookId = coverPage.BookId
-                    });
+                        //If you want convert to a bitmap file
+                        TypeConverter tc = TypeDescriptor.GetConverter(typeof(Bitmap));
+                        //Bitmap MyBitmap = (Bitmap)tc.ConvertFrom(imgBytes);
+                        // Set the content type based on the file extension
+                        //var contentType = GetContentType(coverPage.ImageMimeType);
+                        //Image img = Image.FromStream(stream, false, true);
+                        // Return the image as a file result
+                        CoverImages.Add(new CoverPageViewModel
+                        {
+                            //CoverImage = MyBitmap, BookId=coverPage.BookId,
+                            BookName = books.FirstOrDefault(b => b.BookID == coverPage.BookId).BookName,
+                            CategoryId = books.FirstOrDefault(b => b.BookID == coverPage.BookId).CategoryID,
+                            ImageContent = imgBytes,
+                            BookId = coverPage.BookId
+                        });
+                    }
                 }
+                Random random = new Random();
+                CoverImages.Sort((x, y) => random.Next(-1, 2));
+
+                ViewBag.LoggedIn = loggedin;
+                var viewModel = new BookViewModel
+                {
+                    AllCategories = categoriesAssociated,
+                    Books = books,
+                    Chapters = chapters,
+                    SelectedBook = selectedBook.BookName,
+                    SelectedCategory = categoriesAssociated.First().CategoryName,
+                    SelectedCategoryId = categoriesAssociated.First().CategoryID,
+                    SelectedBookId = selectedBook.BookID,
+                    SelectedChapterId = chapters.First().ChapterID,
+                    SelectedChapter = chapters.First().ChapterName,
+                    SelectedChapterContent = chapters.First().Content,
+                    CoverPages = CoverImages,
+                    //Roles = roles,
+                    //SelectedRoleId = roles.First().RoleID,
+
+
+                };
+                return View(viewModel);
             }
-            Random random = new Random();
-            CoverImages.Sort((x, y) => random.Next(-1, 2));
-
-            ViewBag.LoggedIn = loggedin;
-            var viewModel = new BookViewModel
+            else
             {
-                AllCategories = categories,
-                Books = books,
-                Chapters = chapters,
-                SelectedBook = books.First().BookName,
-                SelectedCategory = categories.First().CategoryName,
-                SelectedCategoryId = categories.First().CategoryID,
-                SelectedBookId = books.First().BookID,
-                SelectedChapterId = chapters.First().ChapterID,
-                SelectedChapter = chapters.First().ChapterName,
-                SelectedChapterContent = chapters.First().Content,
-                CoverPages = CoverImages,
-                //Roles = roles,
-                //SelectedRoleId = roles.First().RoleID,
-                
-
-            };
-            return View(viewModel);
+                var dummyCategories = DummyDataGenerator.GenerateCategories();
+                var dummyBooks = DummyDataGenerator.GenerateBooks();
+                List<CoverPageViewModel> CoverImages = new List<CoverPageViewModel>();
+                foreach (var coverPage in DummyDataGenerator.GenerateCoverPages())
+                {
+                    if (coverPage != null)
+                    {
+                        
+                        CoverImages.Add(new CoverPageViewModel
+                        {
+                            //CoverImage = MyBitmap, BookId=coverPage.BookId,
+                            BookName = dummyBooks.FirstOrDefault(b => b.BookID == coverPage.BookId).BookName,
+                            CategoryId = dummyBooks.FirstOrDefault(b => b.BookID == coverPage.BookId).CategoryID,
+                            ImageContent = coverPage.ImageData,
+                            BookId = coverPage.BookId
+                        });
+                    }
+                }
+                var dummyModel = new BookViewModel
+                {
+                    AllCategories = dummyCategories,
+                    Books = dummyBooks,
+                    Chapters = DummyDataGenerator.GenerateChapters(),
+                    
+                    SelectedCategoryId = 1,
+                    SelectedBookId = 1,
+                    SelectedChapterId = 1,
+                    
+                    SelectedChapterContent = DummyDataGenerator.GenerateChapters().First().Content,
+                    CoverPages = CoverImages,
+                };
+                return View(dummyModel);
+            }
+            
             
         }
         
@@ -96,131 +147,235 @@ namespace BookManagementSystem_BMS.Controllers
         // GET: BookController/Details/5
         public ActionResult Details(BookViewModel viewModel, int categoryId)
         {
-            var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
-            int bookId = books.First().BookID;
-            var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+            //find the logged in user role
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            if (!string.IsNullOrEmpty(strRoleId))
+            {
+                var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                int bookId = books.First().BookID;
+                var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
 
-            ViewBag.Roles = _dbContext.Roles.ToList();
+                ViewBag.Roles = _dbContext.Roles.ToList();
 
-            var categories = _dbContext.Categories.ToList();
-            viewModel.AllCategories = categories;
-            viewModel.Books = books;
-            viewModel.SelectedCategoryId = categoryId;
-            viewModel.SelectedBookId = bookId;
-            viewModel.Chapters = chapters;
-            viewModel.SelectedChapterId = chapters.First().ChapterID;
-            viewModel.SelectedChapterContent = chapters.First().Content;
-            //viewModel.Roles = roles;
-            //viewModel.SelectedRoleId = roles.First().RoleID;
-            //var viewModel = new BookViewModel
-            //{
-            //    AllCategories = categories,
-            //    SelectedCategory = categories.FirstOrDefault(b => b.CategoryID == categoryId, categories.First()).CategoryName,
-            //    SelectedCategoryId = categoryId
-            //};
+                var categories = _dbContext.Categories.ToList();
+                viewModel.AllCategories = categories;
+                viewModel.Books = books;
+                viewModel.SelectedCategoryId = categoryId;
+                viewModel.SelectedBookId = bookId;
+                viewModel.Chapters = chapters;
+                viewModel.SelectedChapterId = chapters.First().ChapterID;
+                viewModel.SelectedChapterContent = chapters.First().Content;
 
-            return View("BookOverview",viewModel);
+
+                return View("BookOverview", viewModel);
+            }
+            else
+            {
+                var books = DummyDataGenerator.GenerateBooks().Where(b => b.CategoryID == categoryId).ToList();
+                int bookId = books.First().BookID;
+                var chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
+
+
+                var categories = DummyDataGenerator.GenerateCategories().ToList();
+                viewModel.AllCategories = categories;
+                viewModel.Books = books;
+                viewModel.SelectedCategoryId = categoryId;
+                viewModel.SelectedBookId = bookId;
+                viewModel.Chapters = chapters;
+                viewModel.SelectedChapterId = chapters.First().ChapterID;
+                viewModel.SelectedChapterContent = chapters.First().Content;
+
+
+                return View("BookOverview", viewModel);
+            }
+            
         }
-        //[HttpGet]
-        //public ActionResult BookOverviewByCover(IFormCollection collection)
-        //{
-        //    string selectedChapter = collection["username"];
-        //    var viewModel = new BookViewModel();
-        //    Console.WriteLine(selectedChapter);
-        //    return View("BookOverview");
-        //}
+        
         [HttpGet]
         public ActionResult BookOverviewByCover(int bookId, int categoryId, int chapterId)
         {
-            var categories = _dbContext.Categories.ToList();
-            var books = _dbContext.Books.Where(b=>b.CategoryID==categoryId).ToList();
-            var chapters = _dbContext.Chapters.Where(c=>c.BookID==bookId).ToList();
-
-            //ViewBag.Roles = _dbContext.Roles.ToList();
-
-            var viewModel = new BookViewModel
+            //find the logged in user role
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            if (!string.IsNullOrEmpty(strRoleId))
             {
-                AllCategories = categories,
-                Books = books,
-                Chapters = chapters,
-                SelectedCategoryId = categoryId,
-                SelectedBookId = bookId,
-                SelectedChapterId = chapterId == 0 ? chapters.First().ChapterID : chapterId,
-                SelectedChapterContent = chapters.FirstOrDefault(c=>c.ChapterID==chapterId, chapters.First()).Content,
-                //Roles = roles,
-                //SelectedRoleId = roles.First().RoleID
+                var categories = _dbContext.Categories.ToList();
+                var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                var chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
 
-            };
 
-            return View("BookOverview", viewModel);
+                var viewModel = new BookViewModel
+                {
+                    AllCategories = categories,
+                    Books = books,
+                    Chapters = chapters,
+                    SelectedCategoryId = categoryId,
+                    SelectedBookId = bookId,
+                    SelectedChapterId = chapterId == 0 ? chapters.First().ChapterID : chapterId,
+                    SelectedChapterContent = chapters.FirstOrDefault(c => c.ChapterID == chapterId, chapters.First()).Content,
+                    //Roles = roles,
+                    //SelectedRoleId = roles.First().RoleID
+
+                };
+
+                return View("BookOverview", viewModel);
+            }
+            else
+            {
+                var categories = DummyDataGenerator.GenerateCategories().ToList();
+                var books = DummyDataGenerator.GenerateBooks().Where(b => b.CategoryID == categoryId).ToList();
+                var chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
+
+
+                var viewModel = new BookViewModel
+                {
+                    AllCategories = categories,
+                    Books = books,
+                    Chapters = chapters,
+                    SelectedCategoryId = categoryId,
+                    SelectedBookId = bookId,
+                    SelectedChapterId = chapterId == 0 ? chapters.First().ChapterID : chapterId,
+                    SelectedChapterContent = chapters.FirstOrDefault(c => c.ChapterID == chapterId, chapters.First()).Content,
+                    //Roles = roles,
+                    //SelectedRoleId = roles.First().RoleID
+
+                };
+
+                return View("BookOverview", viewModel);
+            }
         }
 
         [HttpGet]
         public ActionResult BookOverview(BookViewModel viewModel)
         {
-            viewModel.AllCategories = _dbContext.Categories.ToList();
-            viewModel.Books = _dbContext.Books.ToList();
-            viewModel.Chapters = _dbContext.Chapters.Where(c=>c.BookID==viewModel.SelectedBookId).ToList();
-            viewModel.SelectedChapterContent = viewModel.Chapters.FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
+            //find the logged in user role
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            if (!string.IsNullOrEmpty(strRoleId))
+            {
+                viewModel.AllCategories = _dbContext.Categories.ToList();
+                var books = _dbContext.Books.ToList();
+                viewModel.Books = books;
+                var chapters = _dbContext.Chapters.Where(c => c.BookID == viewModel.SelectedBookId).ToList();
+                if (chapters == null)
+                {
+                    var bookId = books.First().BookID;
+                    chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+                }
+                viewModel.Chapters = chapters;
+                viewModel.SelectedChapterContent = viewModel.Chapters.FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
 
+                return View("BookOverview", viewModel);
+            }
+            else
+            {
+                viewModel.AllCategories = DummyDataGenerator.GenerateCategories().ToList();
+                var books = DummyDataGenerator.GenerateBooks().ToList();
+                viewModel.Books = books;
+                var chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == viewModel.SelectedBookId).ToList();
+                if (chapters == null)
+                {
+                    var bookId = books.First().BookID;
+                    chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
+                }
+                viewModel.Chapters = chapters;
+                viewModel.SelectedChapterContent = DummyDataGenerator.GenerateChapters().FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
 
-            return View("BookOverview", viewModel);
+                return View("BookOverview", viewModel);
+            }
         }
         // GET: Book/GetBooksByCategory
         public ActionResult GetBooksByCategory(BookViewModel viewModel, int categoryId)
         {
-            viewModel.Books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
-            viewModel.SelectedBookId = viewModel.Books.First().BookID;
+            //find the logged in user role
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            if (!string.IsNullOrEmpty(strRoleId))
+            {
+                viewModel.Books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
+                viewModel.SelectedBookId = viewModel.Books.First().BookID;
 
-            ViewBag.Roles = _dbContext.Roles.ToList();
+                ViewBag.Roles = _dbContext.Roles.ToList();
 
-            viewModel.SelectedRoleId = viewModel.Roles.First().RoleID;
-            //var books = _dbContext.Books.Where(b => b.CategoryID == categoryId).ToList();
-            //var viewModel = new BookViewModel
-            //{
-            //    Books = books,
-            //    SelectedBook = books.FirstOrDefault(b => b.BookID == bookId, books.First()).BookName,
-            //    SelectedBookId = bookId!=0?bookId :books.First().BookID,
-            //};
+                viewModel.SelectedRoleId = viewModel.Roles.First().RoleID;
+                
+                return PartialView("_BooksDropdown", viewModel);
+            }
+            else
+            {
+                viewModel.Books = DummyDataGenerator.GenerateBooks().Where(b => b.CategoryID == categoryId).ToList();
+                viewModel.SelectedBookId = viewModel.Books.First().BookID;
 
-            return PartialView("_BooksDropdown", viewModel);
+                return PartialView("_BooksDropdown", viewModel);
+            }
         }
         
         // GET: Book/GetChaptersByBook
         public ActionResult GetChaptersByBook(BookViewModel viewModel, int bookId, int categoryId)
         {
-            if (categoryId == 0)
+            //find the logged in user role
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            if (!string.IsNullOrEmpty(strRoleId))
             {
-                categoryId = _dbContext.Books.First(b=>b.BookID == bookId).CategoryID;
+                if (categoryId == 0)
+                {
+                    categoryId = _dbContext.Books.First(b => b.BookID == bookId).CategoryID;
+                }
+                viewModel.Chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
+                viewModel.SelectedChapterId = viewModel.Chapters.First().ChapterID;
+                viewModel.SelectedChapterContent = viewModel.Chapters.First().Content;
+                viewModel.SelectedBookId = bookId;
+                viewModel.SelectedCategoryId = categoryId;
+
+                return PartialView("_ChaptersDropdown", viewModel);
             }
-            viewModel.Chapters = _dbContext.Chapters.Where(c => c.BookID == bookId).ToList();
-            viewModel.SelectedChapterId = viewModel.Chapters.First().ChapterID;
-            viewModel.SelectedChapterContent = viewModel.Chapters.First().Content;
-            viewModel.SelectedBookId = bookId;
-            viewModel.SelectedCategoryId = categoryId;
+            else
+            {
+                if (categoryId == 0)
+                {
+                    categoryId = DummyDataGenerator.GenerateBooks().First(b => b.BookID == bookId).CategoryID;
+                }
+                viewModel.Chapters = DummyDataGenerator.GenerateChapters().Where(c => c.BookID == bookId).ToList();
+                viewModel.SelectedChapterId = viewModel.Chapters.First().ChapterID;
+                viewModel.SelectedChapterContent = viewModel.Chapters.First().Content;
+                viewModel.SelectedBookId = bookId;
+                viewModel.SelectedCategoryId = categoryId;
 
-            //var viewModel = new BookViewModel
-            //{
-            //    Chapters = chapters,
-            //    SelectedChapter = chapters.FirstOrDefault(b => b.ChapterID == chapterId, chapters.First()).ChapterName,
-            //    SelectedChapterId = chapterId!=0?chapterId: chapters.First().ChapterID,
-            //};
-
-            return PartialView("_ChaptersDropdown", viewModel);
+                return PartialView("_ChaptersDropdown", viewModel);
+            }
+            
         }
 
         // GET: Book/GetChapterContent
         public ActionResult GetChapterContent(BookViewModel viewModel, int chapterId)
         {
-            var content = _dbContext.Chapters.FirstOrDefault(c => c.ChapterID == chapterId).Content;
-            //var chapter = viewModel.Chapters.FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId);
-
-            if (content != null)
+            //find the logged in user role
+            string strRoleId = User.FindFirstValue(ClaimTypes.Role);
+            // parse the id
+            if (!string.IsNullOrEmpty(strRoleId))
             {
-                return Content(content);
-            }
+                var content = _dbContext.Chapters.FirstOrDefault(c => c.ChapterID == chapterId).Content;
 
-            return Content(string.Empty);
+                if (content != null)
+                {
+                    return Content(content);
+                }
+
+                return Content(string.Empty);
+            }
+            else
+            {
+                var content = DummyDataGenerator.GenerateChapters().FirstOrDefault(c => c.ChapterID == chapterId).Content;
+
+                if (content != null)
+                {
+                    return Content(content);
+                }
+
+                return Content(string.Empty);
+            }
         }
 
         [HttpGet]
