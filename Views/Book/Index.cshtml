@@ -8,11 +8,7 @@
     <div style="flex: 1; display: flex; border:10px;" class="border">
         
         <form id="loginFormContent" action="@Url.Action("BookOverview", "Book")" method="get" style="flex: 1; display: flex; border:10px;" class="border">
-            @Html.HiddenFor(model => model.AllCategories)
-            @Html.HiddenFor(model => model.Books)
-            @Html.HiddenFor(model => model.Chapters)
-            @Html.HiddenFor(model => model.CoverPages)
-            @Html.HiddenFor(model => model.SelectedCategoryId)
+            
             <div style="flex: 1; padding: 10px;" class="border">
                 <h2>Categories</h2>
                 <ul>

@@ -296,8 +296,19 @@ namespace BookManagementSystem_BMS.Controllers
             // parse the id
             if (!string.IsNullOrEmpty(strRoleId))
             {
-                viewModel.AllCategories = _dbContext.Categories.ToList();
+
+                int roleId = int.Parse(strRoleId);
+                var role = _dbContext.Roles
+                    .Include(r => r.Categories)
+                    .FirstOrDefault(r => r.RoleID == roleId);
+                var categories = role.Categories;
+
+                var categoryIds = categories.Select(c => c.CategoryID).ToList();
+                
                 var books = _dbContext.Books.ToList();
+                viewModel.SelectedCategoryId = books.First(b=>b.BookID==viewModel.SelectedBookId).CategoryID;
+                viewModel.AllCategories = categories;
+                
                 viewModel.Books = books;
                 var chapters = _dbContext.Chapters.Where(c => c.BookID == viewModel.SelectedBookId).ToList();
                 if (chapters.Count == 0)
@@ -307,6 +318,7 @@ namespace BookManagementSystem_BMS.Controllers
                     viewModel.SelectedChapterId = chapters.First().ChapterID;
                 }
                 viewModel.Chapters = chapters;
+                //viewModel.SelectedCategoryId = selectedCatId;
                 viewModel.SelectedChapterContent = viewModel.Chapters.FirstOrDefault(c => c.ChapterID == viewModel.SelectedChapterId, viewModel.Chapters.First()).Content;
 
                 return View("BookOverview", viewModel);

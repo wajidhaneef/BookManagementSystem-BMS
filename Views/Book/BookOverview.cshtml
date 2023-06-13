@@ -5,9 +5,7 @@
     <div class="col-md-6 border">
 
         <form id="loginFormContent" action="@Url.Action("BookOverview", "Book")">
-            @Html.HiddenFor(model => model.SelectedCategoryId)
-            @Html.HiddenFor(model => model.SelectedBookId)
-            @Html.HiddenFor(model => model.SelectedChapterId)
+            
             <h4>Categories</h4>
             <div class="form-group">
                 <label for="selectedCategory">Select Category:</label>
