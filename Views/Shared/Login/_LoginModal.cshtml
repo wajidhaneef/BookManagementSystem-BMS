@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
 </head>
@@ -9,9 +10,10 @@
                 <div class="modal-body">
                     <div id="loginForm">
                         <form id="loginFormContent" action="@Url.Action("Login", "User")" method="get">
+                            <span id="loginError" class="text-danger"></span>
                             <div class="form-group">
-                                <label for="username">Username</label>
-                                <input type="email" class="form-control" id="username" name="username" placeholder="Enter username" required>
+                                <label for="username">Email</label>
+                                <input type="email" class="form-control" id="username" name="username" placeholder="Enter Email" required>
                             </div>
                             <div class="form-group">
                                 <label for="password">Password</label>
@@ -26,28 +28,51 @@
                         </form>
                     </div>
                     <div id="signupForm" style="display: none;">
-                        <button id="backButton" class="btn btn-primary">Back to Login</button>
                         <form id="signupFormContent" action="@Url.Action("Signup", "User")" method="post" onSubmitHandle()>
                             <div class="form-group">
-                                <label for="signupUsername">Username</label>
-                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter username" onkeydown="return /[a-z]/i.test(event.key)" required>
+                                <label for="signupUsername">Full Name</label>
+                                <input type="text" class="form-control" id="signupUsername" name="signupUsername" placeholder="Enter Full Name" required>
+                                <span id="nameError" class="text-danger"></span>
                             </div>
                             <div class="form-group">
                                 <label for="signupEmail">Email</label>
                                 <input type="email" class="form-control" id="signupEmail" name="signupEmail" placeholder="Enter email" required>
+                                <span id="emailError" class="text-danger"></span>
                             </div>
-                            <div class="form-group">
+                            @*<div class="form-group">
                                 <label for="userRole">Role</label>
                                 <input type="text" class="form-control" id="userRole" name="userRole" placeholder="Enter Role" onkeydown="return /[a-z]/i.test(event.key)" required>
+                            </div>*@
+                            @*<div class="form-group">
+                                <label for="selectedRole">Select Role:</label>
+                                @Html.DropDownListFor(model => model.SelectedRoleId, new SelectList(Model.Roles,
+                                "RoleID", "RoleName"), "-- Select a Role --", new { id = "roleId",
+                                @class = "form-control",})
+                            <span id="roleError" class = "text-danger"></span>
+                            </div>*@
+                            <div>
+                                <label for="roleId">Role:</label> <br/>
+                                <select id="roleId">
+                                    <option value="">Select a Role</option>
+                                    <option value="3">English Teacher</option>
+                                    <option value="13">Math Teacher</option>
+                                    <option value="14">Science Teacher</option>
+                                    <option value="15">Super Teacher</option>
+                                </select> <br/>
+                                <span id="roleError" class="text-danger"></span>
                             </div>
+                            
                             <div class="form-group">
                                 <label for="signupPassword">Password</label>
                                 <input type="password" class="form-control" id="signupPassword" name="signupPassword" placeholder="Enter password" required>
+                                
                             </div>
                             <div class="form-group">
                                 <label for="confirmPassword">Confirm Password</label>
                                 <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirm password" required>
+                                <span id="passwordError" class="text-danger"></span>
                             </div>
+                            <button id="backButton" type="button" class="btn btn-primary">Back to Login</button>
                             <button id="signupSubmitBtn" type="submit" class="btn btn-primary">SignUp</button>
                         </form>
                         </div>

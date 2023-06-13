@@ -6,78 +6,91 @@
 
 <div style="display: flex; flex-direction: column; height: 100vh;">
     <div style="flex: 1; display: flex; border:10px;" class="border">
-        <div style="flex: 1; padding: 10px;" class="border">
-            <h2>Categories</h2>
-            <ul>
-                @foreach (var category in Model.AllCategories)
-                {
-                    <li>
-                        <a href="@Url.Action("Details", new { categoryId = category.CategoryID })">
-                            @category.CategoryName
-                        </a>
-                    </li>
-                }
-            </ul>
-        </div>
-        <div style="flex: 1; padding: 10px;" class="border">
-            <h4>Books</h4>
-            <div class="form-group">
-                <label for="selectedBook">Select Book:</label>
-                @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
-                "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
-                @class = "form-control", onchange="loadChapters()",})
-
+        
+        <form id="loginFormContent" action="@Url.Action("BookOverview", "Book")" method="get" style="flex: 1; display: flex; border:10px;" class="border">
+            
+            <div style="flex: 1; padding: 10px;" class="border">
+                <h2>Categories</h2>
+                <ul>
+                    @foreach (var category in Model.AllCategories)
+                    {
+                        <li>
+                            <a href="@Url.Action("Details",  new {categoryId = category.CategoryID} )">
+                                @category.CategoryName
+                            </a>
+                        </li>
+                    }
+                </ul>
             </div>
-            <div class="form-group">
-                <div id="chapters">
-                    <h4>Chapters</h4>
-                    <div >
-                        <label for="selectedChapter">Select Chapter:</label>
-                        <select>
-                            <option value="" >--- Select Chapter ---</option>
-                        </select>
+            <div style="flex: 1; padding: 10px;" class="border">
+                <div>
+                    <h4>Books</h4>
+                    <div class="form-group">
+                        <label for="selectedBook">Select Book:</label>
+                        @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
+                        "BookID", "BookName"), "-- Select a Book --", new { id = "bookId",
+                        @class = "form-control", onchange="loadChapters()"})
+
                     </div>
                 </div>
-                <button class="btn btn-primary" type="submit" onclick="loadOverview()">Submit</button>
+                <div class="form-group">
+                    <div id="chapters">
+                        <h4>Chapters</h4>
+                        <div class="form-group">
+                            <label for="selectedChapter">Select Chapter:</label>
+                            @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters.Where(c=>c.BookID==Model.SelectedBookId).ToList(),
+                            "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "chapterId",
+                            @class = "form-control", onchange="loadChapterContent()"})
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" type="submit" >Submit</button>
+                </div>
+
             </div>
-        </div>
+        </form>
     </div>
     <div style="flex: 1; padding: 10px;" class="border">
         <h2>Random Book Images</h2>
         @foreach (var coverpage in Model.CoverPages)
         {
             <div class="d-inline-flex m-2 border border-primary">
-                <a href="@Url.Action("BookOverviewByCover", new { bookId = coverpage.BookId, categoryId=coverpage.CategoryId, chapterId=1, home=-1})">
+                <a href="@Url.Action("BookOverviewByCover", new { bookId = coverpage.BookId, categoryId=coverpage.CategoryId, })">
                     <img src="data:image/jpg;base64, @Convert.ToBase64String(@coverpage.ImageContent)" alt="@coverpage.BookName" width="150" height="200" />
                 </a>
             </div>
         }
     </div>
 </div>
-
 @section Scripts {
     <script>
-        //$(document).ready(function () {
-        //    var val = '@ViewBag.LoggedIn';
-        //    if (val === "loggedin") {
-        //        console.log('logout')
-        //        $('#loginButton').hide();
-        //    }
-        //    else {
-        //        console.log('login')
-        //        $('#logoutButton').hide();
-        //    }
-        //});
+        function logOut() {
+            $.ajax({
+                url: '@Url.Action("Logout", "User")',
+                type: 'GET',
+                datatype: 'text',
+                success: function (result) {
+                    console.log(result);
+                    if (result == "loggedout") {
+                        location.reload();
+                    }
+                },
+                error: function (result) {
+                    console.log(result)
+                    alert(result);
+                }
+            });
+        }
+
         function loadChapters() {
             //var returnUrl = 'Request.Query["returnUrl"]';
             //console.log("");
             console.log("load chapters")
-            let bookId = $("#selectedBook").val();
+            let bookId = $("#bookId").val();
             if (bookId !== "") {
                 $.ajax({
                     url: '@Url.Action("GetChaptersByBook")',
                     type: 'GET',
-                    data: { bookId: bookId, chapterId: @Model.SelectedChapterId },
+                    data: { bookId: bookId, },
                     success: function (result) {
                         $("#chapters").html(result);
                     },
@@ -90,17 +103,18 @@
                 $("#chapters").html("<option value=''>Select a book first</option>");
             }
         }
-        function loadOverview() {
+        function loadOverview(event) {
+            console.log(event);
             console.log("Load Content")
-            let bookId = $("#selectedBook").val();
-            let chapterId = $("#selectedChapter").val();
+            let bookId = $("#bookId").val();
+            let chapterId = $("#chapterId").val();
             if (bookId !== "" && chapterId !== "") {
                 $.ajax({
                     url: '@Url.Action("BookOverviewByCover")',
                     type: 'GET',
-                    data: { bookId: bookId, categoryId:-1, chapterId: chapterId, home:1},
+                    data: { bookId: bookId, categoryId:-1, chapterId: chapterId},
                     success: function (result) {
-                        $("#mainContainer").html(result);
+                        //$("#mainContainer").html(result);
                     },
                     error: function () {
                         alert("An error occurred while loading chapters.");

@@ -1,4 +1,5 @@
 ﻿using BookManagementSystem_BMS.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 
 namespace BookManagementSystem_BMS.ViewModels
@@ -17,5 +18,9 @@ namespace BookManagementSystem_BMS.ViewModels
         public string SelectedChapterContent { get; set; }
         public List<CoverPageViewModel> CoverPages { get; set; }
         public string LoggedIn { get; set;}
+
+        [Required(ErrorMessage = "Role is required")]
+        public List<Role> Roles { get; set; }
+        public int SelectedRoleId { get; set; }
     }
 }

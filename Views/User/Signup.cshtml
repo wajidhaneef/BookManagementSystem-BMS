@@ -1,0 +1,45 @@
+﻿@model BookManagementSystem_BMS.ViewModels.UserViewModel
+
+<h2>Signup</h2>
+
+@using (Html.BeginForm("SignupPage", "User", FormMethod.Post))
+{
+    
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Username)
+        @Html.TextBoxFor(m => m.Username, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.EmailAddress)
+        @Html.TextBoxFor(m => m.EmailAddress, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.EmailAddress, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        <label for="selectedRole">Select Role:</label>
+        @Html.DropDownListFor(model => model.SelectedRoleId, new SelectList(Model.Roles,
+        "RoleID", "RoleName"), "-- Select a Role --", new { id = "roleId",
+        @class = "form-control",})
+        @Html.ValidationMessageFor(m => m.SelectedRoleId, "", new { @class = "text-danger" })
+        @Html.HiddenFor(m=>m.Roles)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password)
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.ConfirmPassword)
+        @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.ConfirmPassword, "", new { @class = "text-danger" })
+    </div>
+    <input type="submit" value="Signup" class="btn btn-primary" />
+    
+    <button type="button" onclick="javascript:history.go(-1);"
+            class="btn btn-primary">
+        Login
+    </button>
+    @*@Html.ActionLink("Login", "LoginPage", "User", null, new { @class = "btn btn-link" })*@
+}

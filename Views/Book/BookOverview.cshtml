@@ -1,50 +1,44 @@
 ﻿@model BookManagementSystem_BMS.ViewModels.BookViewModel
 
-<div class="row">
-    <div class="col-md-6">
-        <h4>Categories</h4>
-        <div class="form-group">
-            <label for="selectedCategory">Select Category:</label>
-            @Html.DropDownListFor(model => model.SelectedCategoryId, new SelectList(Model.AllCategories, 
-                "CategoryID", "CategoryName"), "-- Select a category --", new { id = "categoryDropdown", 
+
+<div class="row border">
+    <div class="col-md-6 border">
+
+        <form id="loginFormContent" action="@Url.Action("BookOverview", "Book")">
+            
+            <h4>Categories</h4>
+            <div class="form-group">
+                <label for="selectedCategory">Select Category:</label>
+                @Html.DropDownListFor(model => model.SelectedCategoryId, new SelectList(Model.AllCategories,
+                "CategoryID", "CategoryName"), "-- Select a category --", new { id = "categoryId",
                 @class = "form-control", onchange="loadBooks()",})
-        </div>
+            </div>
 
-        @*<div class="form-group">
-            <label for="selectedCategory">Select Category:</label>
-            <select id="categoryDropdown" class="form-control" onchange="loadBooks()">
-                <option value=@(Model.SelectedBookId!=-1?Model.SelectedBookId:"")>@(Model.SelectedBookId != -1 ? Model.SelectedCategory : "--Select a category --")</option>
-                @foreach (var category in Model.AllCategories)
-                {
-                    <option value="@category.CategoryID" selected="@(Model.SelectedCategoryId==category.CategoryID)?@true:@false">@category.CategoryName</option>
-                }
-            </select>
-        </div>*@
 
-        <div id="books" class="mt-4" >
-            @*<h4>Books</h4>
-            <div class="form-group">
-                <label for="selectedBook">Select Book:</label>
-                @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
-                "BookID", "BookName"), "-- Select a Book --", new { id = "selectedBook",
-                @class = "form-control", onchange="loadChapters()",})
+            <div id="books" class="mt-4">
+                <h4>Books</h4>
+                <div class="form-group">
+                    <label for="selectedBook">Select Book:</label>
+                    @Html.DropDownListFor(model => model.SelectedBookId, new SelectList(Model.Books,
+                    "BookID", "BookName"), "-- Select a Book --", new { id = "bookId",
+                    @class = "form-control", onchange="loadChapters()"})
 
-            </div>*@
-        </div>
-
-        <div id="chapters" class="mt-4">
-            @*<h4>Chapters</h4>
-            <div class="form-group">
-                <label for="selectedChapter">Select Chapter:</label>
-                @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
-                "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "selectedChapter",
-                @class = "form-control", onchange="loadChapterContent()",})
-            </div>*@
-        </div>
+                </div>
+            </div>
+                <div id="chapters" class="mt-4 mb-2">
+                <h4>Chapters</h4>
+                <div class="form-group">
+                    <label for="selectedChapter">Select Chapter:</label>
+                    @Html.DropDownListFor(model => model.SelectedChapterId, new SelectList(Model.Chapters,
+                    "ChapterID", "ChapterName"), "-- Select a Chapter --", new { id = "chapterId",
+                    @class = "form-control", onchange="loadChapterContent()"})
+                </div>
+            </div>
+        </form>
     </div>
 
-    <div class="col-md-6">
-        <h4>Chapter Content</h4>
+    <div class="col-md-6 border" >
+        <h4 style="text-align:center;">Chapter Content</h4>
         <div id="chapterContent">
             <p>@Model.SelectedChapterContent</p>
         </div>
@@ -55,17 +49,35 @@
     <script>
         $(document).ready(function () {
             
-            loadBooks();
+            //loadBooks();
             console.log("run on the load page")
         });
+        function logOut() {
+                $.ajax({
+                    url: '@Url.Action("Logout", "User")',
+                    type: 'GET',
+                    datatype: 'text',
+                    success: function (result) {
+                        console.log(result);
+                        if (result == "loggedout") {
+                            location.reload();
+                        }
+                    },
+                    error: function (result) {
+                        console.log(result)
+                        alert(result);
+                    }
+                });
+            }
+
         function loadBooks() {
             console.log("load books")
-            let categoryId = $("#categoryDropdown").val();
+                let categoryId = $("#categoryId").val();
             if (categoryId !== "") {
                 $.ajax({
                     url: '@Url.Action("GetBooksByCategory")',
                     type: 'GET',
-                    data: { categoryId: categoryId != 0 ? categoryId : @Model.SelectedCategoryId, bookId: @Model.SelectedBookId },
+                        data: { categoryId: categoryId == 0 ? @Model.SelectedCategoryId : categoryId, },
                     success: function (result) {
                         $("#books").html(result);
                     },
@@ -83,12 +95,12 @@
 
         function loadChapters() {
             console.log("load chapters")
-            let bookId = $("#selectedBook").val();
+                let bookId = $("#bookId").val();
             if (bookId !== "") {
                 $.ajax({
                     url: '@Url.Action("GetChaptersByBook")',
                     type: 'GET',
-                    data: { bookId: bookId, chapterId:@Model.SelectedChapterId },
+                    data: { bookId: bookId == 0 ? @Model.SelectedBookId : bookId, categoryId:@Model.SelectedCategoryId },
                     success: function (result) {
                         $("#chapters").html(result);
                         $("#chapterContent").html("<p>Select a chapter to view its content.</p>");
@@ -105,15 +117,19 @@
         }
 
         function loadChapterContent() {
-            console.log("load chapters")
-            let chapterId = $("#selectedChapter").val();
+            console.log("load chapter's content");
+            let categoryId = $("#categoryId").val();
+            let bookId = $("#bookId").val();
+            let chapterId = $("#chapterId").val();
             if (chapterId !== "") {
                 $.ajax({
                     url: '@Url.Action("GetChapterContent")',
                     type: 'GET',
-                    data: { chapterId: chapterId != 0 ? chapterId : @Model.SelectedChapterId },
+                    data: { chapterId: chapterId != 0 ? chapterId : @Model.SelectedChapterId, },
                     success: function (result) {
                         $("#chapterContent").html("<p>" + result + "</p>");
+                        history.replaceState({}, "", `/Book/BookOverviewByCover?bookId=${bookId}&categoryId=${categoryId}&chapterId=${chapterId}`);
+                        console.log(`/Book/BookOverviewByCover?bookId=${bookId}&categoryId=${categoryId}&chapterId=${chapterId}`);
                     },
                     error: function () {
                         alert("An error occurred while loading chapter content.");

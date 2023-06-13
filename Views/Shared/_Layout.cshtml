@@ -12,8 +12,8 @@
 <body id="mainContainer">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand d-flex" asp-area="" asp-controller="Home" asp-action="Index">Book Management System</a>
+            <div class="container-fluid d-flex">
+                <a class="navbar-brand " style="margin-left: 30%;" asp-area="" asp-controller="Book" asp-action="Index">Hi <b>@User.Identity.Name</b>, Welcome to <b>Book Management System</b></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -28,12 +28,12 @@
                         <li class="nav-item">
                             @if (User.Identity.IsAuthenticated)
                             {
-                                <a id="logoutButton" class="btn btn-primary" asp-controller="User" asp-action="Logout">
+                                <a id="logoutButton" class="btn btn-primary" onclick="logOut()">
                                     Logout
                                 </a>
                             }
                             else{
-                                <button id="loginButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
+                                <button id="loginButton" type="button" class="btn btn-primary" >
                                 Login
                             </button>
                             }
@@ -54,7 +54,7 @@
         @Html.Partial("Login/_LoginModal")
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - BookManagementSystem_BMS - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2023 - BookManagementSystem_BMS - <a asp-area="" >Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -66,11 +66,52 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
+        $(document).ready(function (){
+            var url = window.location.href;
+            console.log(url);
+            if (url === "https://localhost:7030/User/LoginPage" || url === "https://localhost:7030/User/SignupPage") {
+                $('#loginButton').hide();
+
+            }
+            $('#loginModal').on('hidden.bs.modal', function () {
+                $(this).find('form').trigger('reset');
+            })
+        });
         
+        //reset the form
+        $('#loginModal').on('hidden.bs.modal', function () {
+            $(this).find('form').trigger('reset');
+        });
         $(function () {
+            
             $('#loginButton').click(function () {
-                $('#loginModal').modal('show');
+                var url = window.location.href;
+                console.log(url);
+                if (url !== "https://localhost:7030/"){
+                    $('#loginModal').modal('show');
+                }
+                else{
+                    window.location.href = "https://localhost:7030/User/LoginPage";
+                }
             });
+
+            function logOut() {
+                $.ajax({
+                    url: '@Url.Action("Logout", "User")',
+                    type: 'GET',
+                    datatype: 'text',
+                    success: function (result) {
+                        console.log(result);
+                        if (result == "loggedout") {
+                            location.reload();
+                        }
+                    },
+                    error: function (result) {
+                        console.log(result)
+                        alert(result);
+                    }
+                });
+            }
             //$('#closeModal').click(function () {
             //    $('#loginModal').modal('hide');
             //});
@@ -102,11 +143,12 @@
                         console.log(result);
                         //hide the modal and login button
                         //$('#loginButton').hide();
-                        //$('#loginModal').hide();
-                        //$('.modal-backdrop').hide();
+                        
                         
 
                         if (result == "success") {
+                            $('#loginModal').hide();
+                            $('.modal-backdrop').hide();
                             //clear the form input fields
                             //$('#signupForm')[0].reset();
                             //$("#signupForm").children('input').val('')
@@ -116,21 +158,16 @@
                             $('#signupPassword').val('');
                             $('#confirmPassword').val('');
 
+                            //reset the modal form
+                            $('#loginModal').on('hidden.bs.modal', function () {
+                                $(this).find('form').trigger('reset');
+                            })
                             //show the login form
                             $("#signupForm").hide();
                             $("#loginForm").show();
-                            $.ajax({
-                                url: '@Url.Action("Index", "Book")',
-                                type: 'GET',
-                                data: { loggedIn: "loggedin" },
-                                success: function (result) {
-                                    $("#mainContainer").html(result);
-                                },
-                                error: function () {
-                                    alert("An error occurred while loading Index Page.");
-                                }
-                            });
+                            location.reload();
                         }
+                        $("#loginError").html("The email or password is incorrect");
                     },
                     error: function (result) {
                         console.log(result)
@@ -144,20 +181,39 @@
                 console.log("on submit");
                 let signupUsername = $("#signupUsername").val();
                 let signupEmail = $("#signupEmail").val();
-                let userRole = $("#userRole").val();
+                var userRole = $("#roleId").val();
                 var password = $("#signupPassword").val();
                 var confirmPassword = $("#confirmPassword").val();
 
+                var passwordPattern = /^((?=.*[a-z])(?=.*[A-Z])(?=.*\d)).+$/;
+                
+                // username validation
+                if(signupUsername===null || signupUsername===""){
+                    $("#nameError").html("The name is required");
+                    return;
+                }
+                //email validation
+                if(signupEmail===null || signupEmail===""){
+                    $("#emailError").html("The email is required");
+                    return;
+                }
+                //role validation
+                if(userRole===0){
+                    $("#roleError").html("The user role is required");
+                    return;
+                }
                 // Check if passwords match
-                if (password !== confirmPassword) {
+                if (!passwordPattern.test(password)) {
                     // Display an error message
                     //$("#passwordMismatchError").text("The passwords do not match.");
-                    alert("The passwords do not match.");
+                    $("#passwordError").html("The Password must contain a small letter, a capital letter, a number and a special character");
+                    return;
+                }
+                else if(password!==confirmPassword){
+                    $("#passwordError").html("The confirm password does not match");
                     return;
                 }
                 else{
-                    
-                    
                     //let signupPassword = $("#signupPassword").val();
                     //let confirmPassword = $("#confirmPassword").val();
                     $.ajax({
